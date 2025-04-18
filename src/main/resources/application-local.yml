@@ -1,0 +1,43 @@
+server:
+  port: 8091
+
+spring:
+  jpa:
+    show-sql: true
+    ddl-auto: none
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
+  liquibase:
+    enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rogatordb
+    username: kumpo
+    password: '%23uejhfdu67'
+
+
+#  security:
+#    user:
+#      roles: xxx
+logging:
+  level:
+    liquibase: DEBUG
+    org:
+      liquibase: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
+springdoc:
+  swagger-ui:
+    path: swagger-ui.html

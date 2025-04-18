@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="adruida">
+        <!-- Create the sequence for the organs table -->
+        <createSequence sequenceName="app_form_seq" startValue="1" incrementBy="1"/>
+
+        <createTable tableName="application_forms">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="application_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_app_form_application"
+                             references="applications(id)" />
+            </column>
+            <column name="position" type="int4" />
+            <column name="name" type="varchar(255)" />
+            <column name="content" type="jsonb" />
+            <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
