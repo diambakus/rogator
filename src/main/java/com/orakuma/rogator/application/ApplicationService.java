@@ -11,4 +11,5 @@ public interface ApplicationService {
     List<ApplicationDto> findAllByEmail(String email);
     List<ApplicationDto> getAllByEmailAndStatus(String email, String status);
     void deleteById(long id);
+    List<ApplicationDto> getAll();
 }

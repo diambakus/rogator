@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "application-form")
+    @RequestMapping(path = "application-form")
 public class ApplicationFormController {
     private final ApplicationFormService applicationFormService;
 
@@ -37,5 +37,10 @@ public class ApplicationFormController {
     @GetMapping(path = "/forms/{applicationId}")
     public List<ApplicationFormDto> getApplicationForms(@PathVariable("applicationId") Long applicationId) {
         return applicationFormService.findByApplicationId(applicationId);
+    }
+
+    @DeleteMapping(path = "/{formId}")
+    public void deleteApplicationForm(@PathVariable("formId") Long formId) {
+        applicationFormService.deleteApplicationForm(formId);
     }
 }

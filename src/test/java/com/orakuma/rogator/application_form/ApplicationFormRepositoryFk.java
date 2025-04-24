@@ -1,5 +1,6 @@
 package com.orakuma.rogator.application_form;
 
+import java.util.List;
 import java.util.Optional;
 
 public class ApplicationFormRepositoryFk implements ApplicationFormRepository {
@@ -66,5 +67,15 @@ public class ApplicationFormRepositoryFk implements ApplicationFormRepository {
     @Override
     public ApplicationFormEntity saveWithJsonb(ApplicationFormEntity entity, Long applicationId) {
         return null;
+    }
+
+    @Override
+    public ApplicationFormEntity updateWithJsonb(ApplicationFormEntity entity, Long applicationId) {
+        return null;
+    }
+
+    @Override
+    public List<ApplicationFormEntity> findAllByApplicationId(Long applicationId) {
+        return List.of();
     }
 }

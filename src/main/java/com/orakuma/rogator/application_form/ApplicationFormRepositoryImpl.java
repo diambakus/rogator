@@ -32,17 +32,16 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
     }
 
     @Override
-    public ApplicationFormEntity updateWithJsonb(ApplicationFormEntity entity, Long applicationId) {
-       String sql = "UPDATE application_forms SET content = CAST(:content as json), name = :name where id =: id";
+    public ApplicationFormEntity updateWithJsonb(ApplicationFormEntity entity, Long formId) {
+       String sql = "UPDATE application_forms SET content = CAST(:content as json), name = :name where id = :formId";
 
        entityManager
                .createNativeQuery(sql)
                .setParameter("name", entity.getName())
                .setParameter("content", entity.getContent())
-               .getSingleResult();
+               .setParameter("formId", formId)
+               .executeUpdate();
 
        return entity;
     }
-
-
 }

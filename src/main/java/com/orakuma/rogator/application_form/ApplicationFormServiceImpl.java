@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ApplicationFormServiceImpl implements ApplicationFormService {
@@ -25,7 +26,14 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     @Override
     public ApplicationFormDto update(Long formId, ApplicationFormDto applicationFormDto) {
-        return null;
+        ApplicationFormEntity convertedEntity = applicationFormMapper.toEntity(applicationFormDto);
+        ApplicationFormEntity entity = repositoriesHandler.getApplicationFormEntityById(formId);
+
+        if (Objects.nonNull(entity)) {
+            entity = applicationFormRepository.updateWithJsonb(convertedEntity, formId);
+        }
+
+        return applicationFormMapper.toDto(entity);
     }
 
     @Override
@@ -47,6 +55,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     public ApplicationFormDto getApplicationForm(Long formId) {
         ApplicationFormEntity formEntity = repositoriesHandler.getApplicationFormEntityById(formId);
         return applicationFormMapper.toDto(formEntity);
+    }
+
+    @Override
+    public void deleteApplicationForm(Long formId) {
+        ApplicationFormEntity formEntity = repositoriesHandler.getApplicationFormEntityById(formId);
+        applicationFormRepository.delete(formEntity);
     }
 
     @Override

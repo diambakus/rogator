@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "applications")
+@RequestMapping(path = "application")
 public class ApplicationController {
     private final ApplicationService applicationService;
 
@@ -31,14 +31,16 @@ public class ApplicationController {
     }
 
     @GetMapping
-    public List<ApplicationDto> getAllApplicationsByEmailAndStatus(
-            @RequestParam(name = "email") String email,
+    public List<ApplicationDto> getAllApplications(
+            @RequestParam(required = false, name = "email") String email,
             @RequestParam(required = false, name = "status") String status
     ) {
-        if (StringUtils.isBlank(status)) {
+        if (!StringUtils.isBlank(status) && !StringUtils.isBlank(email)) {
+            return applicationService.getAllByEmailAndStatus(email, status);
+        } else if (StringUtils.isNotBlank(email)) {
             return applicationService.findAllByEmail(email);
         }
-        return applicationService.getAllByEmailAndStatus(email, status);
+        return applicationService.getAll();
     }
 
     @PostMapping

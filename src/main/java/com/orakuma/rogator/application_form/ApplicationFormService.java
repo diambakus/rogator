@@ -9,4 +9,5 @@ public interface ApplicationFormService {
     List<ApplicationFormDto> findByApplicationId(Long id);
     ApplicationFormDto save(Long applicationId, ApplicationFormDto applicationFormDto);
     ApplicationFormDto getApplicationForm(Long formId);
+    void deleteApplicationForm(Long formId);
 }

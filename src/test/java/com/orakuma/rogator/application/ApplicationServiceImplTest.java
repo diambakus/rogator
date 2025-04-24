@@ -37,4 +37,9 @@ public class ApplicationServiceImplTest implements ApplicationService {
     @Override
     public void deleteById(long id) {
     }
+
+    @Override
+    public List<ApplicationDto> getAll() {
+        return List.of();
+    }
 }

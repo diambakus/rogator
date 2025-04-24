@@ -17,6 +17,7 @@ public interface ApplicationMapper {
         return switch (status.toUpperCase()) {
             case "CREATED" -> ApplicationStatus.CREATED;
             case "PENDING" -> ApplicationStatus.PENDING;
+            case "PAYED" -> ApplicationStatus.PAYED;
             case "DONE" -> ApplicationStatus.DONE;
             default -> {
                 yield ApplicationStatus.CANCELLED;
