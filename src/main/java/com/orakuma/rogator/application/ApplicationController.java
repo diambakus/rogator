@@ -1,6 +1,10 @@
 package com.orakuma.rogator.application;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +49,10 @@ public class ApplicationController {
 
     @PostMapping
     public ApplicationDto createApplication(@RequestBody ApplicationDto applicationDto) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        System.out.println(authentication);
+
         return applicationService.save(applicationDto);
     }
 
