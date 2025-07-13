@@ -8,6 +8,6 @@
  #     #  ####   ####  #    #   #    ####  #    #
 
 ----------------------------------------------------------------------
-:: SERVITUS :: Powered by Orakuma Technologies
+:: Rogator :: Powered by Orakuma Technologies
 :: Spring Boot ${spring-boot.version} | Java ${java.version} ::
 ----------------------------------------------------------------------
