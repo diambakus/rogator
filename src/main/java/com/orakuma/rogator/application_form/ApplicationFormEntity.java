@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 @ToString
 @Entity
-@Table(name = "application_forms")
+@Table(name = "application_forms", schema = "rogator")
 public class ApplicationFormEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_form_gen")

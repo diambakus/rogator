@@ -4,6 +4,7 @@ import com.orakuma.rogator.application.ApplicationEntity;
 import com.orakuma.rogator.utils.RepositoriesHandler;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +26,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
+    @Transactional
     public ApplicationFormDto update(Long formId, ApplicationFormDto applicationFormDto) {
         ApplicationFormEntity convertedEntity = applicationFormMapper.toEntity(applicationFormDto);
         ApplicationFormEntity entity = repositoriesHandler.getApplicationFormEntityById(formId);
@@ -42,6 +44,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
+    @Transactional
     public ApplicationFormDto save(Long applicationId, ApplicationFormDto applicationFormDto) {
         ApplicationFormEntity applicationFormEntity = applicationFormMapper.toEntity(applicationFormDto);
         ApplicationEntity applicationEntity = repositoriesHandler.getApplicationEntityById(applicationId);
@@ -58,6 +61,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
+    @Transactional
     public void deleteApplicationForm(Long formId) {
         ApplicationFormEntity formEntity = repositoriesHandler.getApplicationFormEntityById(formId);
         applicationFormRepository.delete(formEntity);

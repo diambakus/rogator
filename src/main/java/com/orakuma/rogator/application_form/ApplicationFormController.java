@@ -1,17 +1,15 @@
 package com.orakuma.rogator.application_form;
 
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-    @RequestMapping(path = "application-form")
+@RequestMapping(path = "application-form")
+@AllArgsConstructor
 public class ApplicationFormController {
     private final ApplicationFormService applicationFormService;
-
-    public ApplicationFormController(ApplicationFormService applicationFormService) {
-        this.applicationFormService = applicationFormService;
-    }
 
     @GetMapping(path = "/{formId}")
     public ApplicationFormDto getApplicationForm(@PathVariable("formId") Long formId) {

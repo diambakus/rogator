@@ -9,7 +9,7 @@
         <!-- Create the sequence for the organs table -->
         <createSequence sequenceName="app_form_seq" startValue="1" incrementBy="1"/>
 
-        <createTable tableName="application_forms">
+        <createTable tableName="application_forms" schemaName="${schemaName}">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>

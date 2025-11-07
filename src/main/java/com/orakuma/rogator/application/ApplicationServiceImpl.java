@@ -1,18 +1,16 @@
 package com.orakuma.rogator.application;
 
 import com.orakuma.rogator.utils.RepositoriesHandler;
-import jakarta.persistence.Entity;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -29,6 +27,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @Transactional
     public ApplicationDto save(ApplicationDto applicationDto) {
         ApplicationEntity applicationEntity = applicationMapper.toEntity(applicationDto);
         applicationEntity.setCreated(LocalDateTime.now());
@@ -37,6 +36,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @Transactional
     public ApplicationDto update(Long id, Map<String, Object> fieldsAndValuesMap) {
         ApplicationEntity applicationEntity = repositoriesHandler.getApplicationEntityById(id);
 
@@ -76,6 +76,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @Transactional
     public void deleteById(long id) {
         applicationRepository.deleteById(id);
     }

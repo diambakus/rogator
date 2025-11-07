@@ -1,5 +1,6 @@
 package com.orakuma.rogator.application;
 
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -12,24 +13,21 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(path = "application")
+@AllArgsConstructor
 public class ApplicationController {
     private final ApplicationService applicationService;
 
-    public ApplicationController(ApplicationService applicationService) {
-        this.applicationService = applicationService;
-    }
-
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "/id/{id}")
     public ApplicationDto getApplication(@PathVariable("id") Long id) {
         return applicationService.findById(id);
     }
 
-    @GetMapping(path = "/{name}")
+    @GetMapping(path = "/name/{name}")
     public ApplicationDto getApplicationByName(@PathVariable("name") String name) {
         return applicationService.findByName(name);
     }
 
-    @GetMapping(path = "/{email}")
+    @GetMapping(path = "/email/{email}")
     public List<ApplicationDto> getAllApplicationsByEmail(@PathVariable("email") String email) {
         return applicationService.findAllByEmail(email);
     }

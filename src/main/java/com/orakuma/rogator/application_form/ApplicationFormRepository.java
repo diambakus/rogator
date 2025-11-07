@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface ApplicationFormRepository extends
         CrudRepository<ApplicationFormEntity, Long>, ApplicationFormRepositoryCustom {
-    @Query(value = "select * from application_forms where applicationId= :applicationId", nativeQuery = true)
+    @Query("select af from ApplicationFormEntity af where af.application.id = :applicationId")
     List<ApplicationFormEntity> findAllByApplicationId(Long applicationId);
 }

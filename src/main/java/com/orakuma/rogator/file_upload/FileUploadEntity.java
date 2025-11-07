@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 @ToString
 @Entity
-@Table(name = "file_upload")
+@Table(name = "file_upload", schema = "rogator")
 public class FileUploadEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "f_upload_gen")

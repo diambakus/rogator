@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @ToString
 @Entity
-@Table(name = "applications")
+@Table(name = "applications", schema = "rogator")
 public class ApplicationEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
