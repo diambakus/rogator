@@ -9,19 +9,45 @@
         <!-- Create the sequence for the organs table -->
         <createSequence sequenceName="app_seq" startValue="1" incrementBy="1"/>
 
-        <createTable tableName="file_upload"  schemaName="${schemaName}">
+        <createTable tableName="file_upload" schemaName="${schemaName}">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="application_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="fk_file_upload_application"
-                             references="applications(id)" />
+                             references="applications(id)"/>
             </column>
-            <column name="file_name" type="varchar(255)" />
-            <column name="file_type" type="varchar(50)" />
-            <column name="file_size" type="bigint" />
-            <column name="file_path" type="text" />
+            <column name="file_name" type="varchar(255)"/>
+            <column name="file_type" type="varchar(50)"/>
+            <column name="file_size" type="bigint"/>
+            <column name="file_path" type="text"/>
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="2" author="adruida">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="file_upload"/>
+            <columnExists tableName="file_upload" columnName="fileName"/>
+        </preConditions>
+        <renameTable oldTableName="file_upload" newTableName="files_locations" />
+        <renameColumn tableName="files_locations" oldColumnName="fileName" newColumnName="filename" columnDataType="text"/>
+    </changeSet>
+
+    <changeSet id="3" author="adruida">
+        <preConditions>
+            <tableExists tableName="files_locations" />
+        </preConditions>
+        <addColumn tableName="files_locations">
+            <column name="stored_filename" type="text"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="4" author="adruida">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="file_upload"/>
+        </preConditions>
+        <delete tableName="file_upload" schemaName="${schemaName}" />
+    </changeSet>
+
 </databaseChangeLog>

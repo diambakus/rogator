@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -15,14 +16,15 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 @ToString
 @Entity
-@Table(name = "file_upload", schema = "rogator")
+@Table(name = "files_locations", schema = "rogator")
+@Accessors(chain = true)
 public class FileUploadEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "f_upload_gen")
     @SequenceGenerator(name ="f_upload_gen", sequenceName = "f_upload_seq", allocationSize = 1)
     @ToString.Exclude
     private Long              id;
-    private String            fileName;
+    private String            filename;
     private String            fileType;
     private Long              fileSize;
     @Column(nullable = false)
@@ -31,4 +33,5 @@ public class FileUploadEntity implements Serializable {
     @JoinColumn(name = "application_id", nullable = false)
     private ApplicationEntity application;
     private LocalDate         created;
+    private String            storedFilename;
 }

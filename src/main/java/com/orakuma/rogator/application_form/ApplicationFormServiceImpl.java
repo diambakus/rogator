@@ -2,6 +2,7 @@ package com.orakuma.rogator.application_form;
 
 import com.orakuma.rogator.application.ApplicationEntity;
 import com.orakuma.rogator.utils.RepositoriesHandler;
+import lombok.AllArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,19 +12,11 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@AllArgsConstructor
 public class ApplicationFormServiceImpl implements ApplicationFormService {
     private final ApplicationFormRepository applicationFormRepository;
     private final ApplicationFormMapper applicationFormMapper;
     private final RepositoriesHandler repositoriesHandler;
-
-    public ApplicationFormServiceImpl(
-            ApplicationFormRepository applicationFormRepository,
-            RepositoriesHandler repositoriesHandler
-    ) {
-        this.applicationFormRepository = applicationFormRepository;
-        this.applicationFormMapper = Mappers.getMapper(ApplicationFormMapper.class);
-        this.repositoriesHandler = repositoriesHandler;
-    }
 
     @Override
     @Transactional

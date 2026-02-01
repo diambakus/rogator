@@ -20,4 +20,12 @@
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
     </changeSet>
+    <changeSet id="2" author="adruida">
+        <preConditions>
+            <tableExists tableName="applications" />
+        </preConditions>
+        <addColumn tableName="applications">
+            <column name="requested_to_unit_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

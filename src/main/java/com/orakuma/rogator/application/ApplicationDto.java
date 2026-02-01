@@ -9,6 +9,7 @@ public record ApplicationDto(
         String        email,
         BigDecimal    price,
         String        status,
-        LocalDateTime created
+        LocalDateTime created,
+        Long requestedToUnitId
 ) {
 }

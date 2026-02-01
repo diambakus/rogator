@@ -1,5 +1,6 @@
 package com.orakuma.rogator.file_upload;
 
+import java.util.List;
 import java.util.Optional;
 
 public class FileUploadRepositoryFk implements FileUploadRepository {
@@ -61,5 +62,10 @@ public class FileUploadRepositoryFk implements FileUploadRepository {
     @Override
     public void deleteAll() {
 
+    }
+
+    @Override
+    public List<FileUploadEntity> findByApplicationId(Long id) {
+        return List.of();
     }
 }
