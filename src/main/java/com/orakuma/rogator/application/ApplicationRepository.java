@@ -7,9 +7,24 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ApplicationRepository extends CrudRepository<ApplicationEntity, Long> {
-    ApplicationEntity findByName(String name);
-    List<ApplicationEntity> findByEmail(String email);
+  ApplicationEntity findByName(String name);
 
-    @Query("select a from ApplicationEntity a where a.email = :email and a.status = :status")
-    List<ApplicationEntity> findByEmailAndStatus(@Param("email") String email, @Param("status") String status);
+  List<ApplicationEntity> findByEmail(String email);
+
+  @Query("select a from ApplicationEntity a where a.email = :email and a.status = :status")
+  List<ApplicationEntity> findByEmailAndStatus(
+      @Param("email") String email, @Param("status") String status);
+
+  @Query(
+"""
+    select a from ApplicationEntity a
+    where
+        (a.assigneeId = :employeeId and a.status = :pending)
+        or
+        (a.assigneeId is null and a.status = :created)
+""")
+  List<ApplicationEntity> findRelevantApplications(
+      @Param("employeeId") String employeeId,
+      @Param("pending") ApplicationStatus pending,
+      @Param("created") ApplicationStatus created);
 }

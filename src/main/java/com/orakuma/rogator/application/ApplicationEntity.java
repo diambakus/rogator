@@ -34,4 +34,5 @@ public class ApplicationEntity implements Serializable {
 
   private LocalDateTime created;
   private Long requestedToUnitId;
+  private String assigneeId;
 }

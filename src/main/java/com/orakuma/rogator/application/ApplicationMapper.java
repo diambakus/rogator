@@ -3,12 +3,15 @@ package com.orakuma.rogator.application;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ApplicationMapper {
     @Mapping(target= "status", expression = "java(toApplicationStatus(applicationDto.status()))")
+    @Mapping(target = "created", ignore = true)
     ApplicationEntity toEntity(ApplicationDto applicationDto);
+    @Mapping(target="created", expression = "java(toStringDate(applicationEntity.getCreated()))")
     ApplicationDto toDto(ApplicationEntity applicationEntity);
     List<ApplicationEntity> toEntities(List<ApplicationDto> applicationDtos);
     List<ApplicationDto> toDtos(List<ApplicationEntity> applicationEntities);
@@ -23,5 +26,9 @@ public interface ApplicationMapper {
                 yield ApplicationStatus.CANCELLED;
             }
         };
+    }
+
+    default String toStringDate(LocalDateTime date) {
+        return date.toString();
     }
 }

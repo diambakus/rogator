@@ -78,4 +78,9 @@ public class ApplicationRepositoryFk implements ApplicationRepository {
     public List<ApplicationEntity> findByEmailAndStatus(String email, String status) {
         return List.of();
     }
+
+    @Override
+    public List<ApplicationEntity> findRelevantApplications(String employeeId, ApplicationStatus pending, ApplicationStatus created) {
+        return List.of();
+    }
 }

@@ -13,19 +13,33 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="name" type="varchar(255)" />
-            <column name="email" type="varchar(255)" />
-            <column name="price" type="decimal" />
-            <column name="status" type="varchar(10)" />
+            <column name="name" type="varchar(255)"/>
+            <column name="email" type="varchar(255)"/>
+            <column name="price" type="decimal"/>
+            <column name="status" type="varchar(10)"/>
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
     </changeSet>
     <changeSet id="2" author="adruida">
         <preConditions>
-            <tableExists tableName="applications" />
+            <tableExists tableName="applications"/>
         </preConditions>
         <addColumn tableName="applications">
             <column name="requested_to_unit_id" type="bigint"/>
         </addColumn>
+    </changeSet>
+    <changeSet id="3" author="adruida">
+        <preConditions>
+            <tableExists tableName="applications"/>
+        </preConditions>
+        <addColumn tableName="applications">
+            <column name="assign_to" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="4" author="adruida">
+        <preConditions>
+            <columnExists tableName="applications" columnName="assign_to"/>
+        </preConditions>
+        <renameColumn tableName="applications" oldColumnName="assign_to" newColumnName="assignee_id"/>
     </changeSet>
 </databaseChangeLog>

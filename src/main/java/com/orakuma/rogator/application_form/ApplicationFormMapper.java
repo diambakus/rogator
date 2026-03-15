@@ -39,7 +39,7 @@ public interface ApplicationFormMapper {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             Map<String, Object> contentMap = objectMapper
-                    .readValue(content, new TypeReference<Map<String, Object>>() {});
+                    .readValue(content, new TypeReference<>() {});
             return contentMap;
         } catch (JsonProcessingException e) {
             LOG.error("ReadValue content to Map has failed: {}", e.getMessage());

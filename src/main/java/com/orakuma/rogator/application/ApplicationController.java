@@ -1,19 +1,20 @@
 package com.orakuma.rogator.application;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping(path = "application")
 @AllArgsConstructor
+@PreAuthorize("isAuthenticated()")
+@Slf4j
 public class ApplicationController {
     private final ApplicationService applicationService;
 
@@ -45,12 +46,14 @@ public class ApplicationController {
         return applicationService.getAll();
     }
 
+    @GetMapping("/display-after-login/{employeeId}")
+    public List<ApplicationDto> getInitialRelevantApplicationsForEmployee(@PathVariable("employeeId") String employeeId) {
+        return applicationService.getAllRelevantApplications(employeeId);
+    }
+
     @PostMapping
     public ApplicationDto createApplication(@RequestBody ApplicationDto applicationDto) {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-        System.out.println(authentication);
-
+        log.info("Creating application at date and time: {}", LocalDateTime.now());
         return applicationService.save(applicationDto);
     }
 
