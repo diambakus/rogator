@@ -46,4 +46,14 @@ public class ApplicationServiceImplTest implements ApplicationService {
   public List<ApplicationDto> getAllRelevantApplications(String employeeId) {
     return List.of();
   }
+
+  @Override
+  public ApplicationDto getApplicationByPublicId(String publicId) {
+    return null;
+  }
+
+  @Override
+  public void deleteByPublicId(String publicId) {
+
+  }
 }

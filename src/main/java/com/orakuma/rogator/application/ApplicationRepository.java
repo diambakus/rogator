@@ -19,12 +19,16 @@ public interface ApplicationRepository extends CrudRepository<ApplicationEntity,
 """
     select a from ApplicationEntity a
     where
-        (a.assigneeId = :employeeId and a.status = :pending)
+        (a.assigneeId = :employeeId and a.status = :processing)
         or
         (a.assigneeId is null and a.status = :created)
 """)
   List<ApplicationEntity> findRelevantApplications(
       @Param("employeeId") String employeeId,
-      @Param("pending") ApplicationStatus pending,
+      @Param("processing") ApplicationStatus processing,
       @Param("created") ApplicationStatus created);
+
+  ApplicationEntity findByPublicId(String publicId);
+
+  void deleteByPublicId(String publicId);
 }

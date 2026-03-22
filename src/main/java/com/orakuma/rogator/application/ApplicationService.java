@@ -21,4 +21,8 @@ public interface ApplicationService {
   List<ApplicationDto> getAll();
 
   List<ApplicationDto> getAllRelevantApplications(String employeeId);
+
+  ApplicationDto getApplicationByPublicId(String publicId);
+
+  void deleteByPublicId(String publicId);
 }

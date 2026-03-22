@@ -42,4 +42,18 @@
         </preConditions>
         <renameColumn tableName="applications" oldColumnName="assign_to" newColumnName="assignee_id"/>
     </changeSet>
+    <changeSet id="5" author="adruida">
+        <preConditions>
+            <not>
+                <columnExists tableName="applications" columnName="expires_at" />
+                <columnExists tableName="applications" columnName="public_id" />
+                <columnExists tableName="applications" columnName="service_id" />
+            </not>
+        </preConditions>
+        <addColumn tableName="applications">
+            <column name="expires_at" type="timestamp" />
+            <column name="public_id" type="bigint" />
+            <column name="service_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

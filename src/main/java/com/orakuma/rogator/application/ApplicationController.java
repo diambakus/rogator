@@ -9,61 +9,81 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
-@RequestMapping(path = "application")
+@RequestMapping(path = "applications")
 @AllArgsConstructor
 @PreAuthorize("isAuthenticated()")
 @Slf4j
 public class ApplicationController {
-    private final ApplicationService applicationService;
+  private final ApplicationService applicationService;
 
-    @GetMapping(path = "/id/{id}")
-    public ApplicationDto getApplication(@PathVariable("id") Long id) {
-        return applicationService.findById(id);
-    }
+  @GetMapping(path = "/email/{email}")
+  public List<ApplicationDto> getAllApplicationsByEmail(@PathVariable("email") String email) {
+    return applicationService.findAllByEmail(email);
+  }
 
-    @GetMapping(path = "/name/{name}")
-    public ApplicationDto getApplicationByName(@PathVariable("name") String name) {
-        return applicationService.findByName(name);
+  // TODO: refactor it
+  /*
+  @GetMapping
+  public ApplicationDto getApplication(
+      @RequestParam(required = false, name = "publicId") String publicId,
+      @RequestParam(required = false, name = "name") String name,
+      @RequestParam(required = false, name = "id") Long id) {
+    if (StringUtils.isNotBlank(publicId)) {
+      return applicationService.getApplicationByPublicId(publicId);
+    } else if (StringUtils.isNotBlank(name)) {
+      return applicationService.findByName(name);
+    } else if (Objects.nonNull(id)) {
+      return applicationService.findById(id);
+    } else {
+      return null;
     }
+  }*/
 
-    @GetMapping(path = "/email/{email}")
-    public List<ApplicationDto> getAllApplicationsByEmail(@PathVariable("email") String email) {
-        return applicationService.findAllByEmail(email);
+  @GetMapping
+  public List<ApplicationDto> getAllApplications(
+      @RequestParam(required = false, name = "email") String email,
+      @RequestParam(required = false, name = "status") String status) {
+    if (!StringUtils.isBlank(status) && !StringUtils.isBlank(email)) {
+      return applicationService.getAllByEmailAndStatus(email, status);
+    } else if (StringUtils.isNotBlank(email)) {
+      return applicationService.findAllByEmail(email);
     }
+    return applicationService.getAll();
+  }
 
-    @GetMapping
-    public List<ApplicationDto> getAllApplications(
-            @RequestParam(required = false, name = "email") String email,
-            @RequestParam(required = false, name = "status") String status
-    ) {
-        if (!StringUtils.isBlank(status) && !StringUtils.isBlank(email)) {
-            return applicationService.getAllByEmailAndStatus(email, status);
-        } else if (StringUtils.isNotBlank(email)) {
-            return applicationService.findAllByEmail(email);
-        }
-        return applicationService.getAll();
-    }
+  @GetMapping("/display-after-login/{employeeId}")
+  public List<ApplicationDto> getInitialRelevantApplicationsForEmployee(
+      @PathVariable("employeeId") String employeeId) {
+    return applicationService.getAllRelevantApplications(employeeId);
+  }
 
-    @GetMapping("/display-after-login/{employeeId}")
-    public List<ApplicationDto> getInitialRelevantApplicationsForEmployee(@PathVariable("employeeId") String employeeId) {
-        return applicationService.getAllRelevantApplications(employeeId);
-    }
+  @PostMapping
+  public ApplicationDto createApplication(@RequestBody ApplicationDto applicationDto) {
+    log.info("Creating application at date and time: {}", LocalDateTime.now());
+    return applicationService.save(applicationDto);
+  }
 
-    @PostMapping
-    public ApplicationDto createApplication(@RequestBody ApplicationDto applicationDto) {
-        log.info("Creating application at date and time: {}", LocalDateTime.now());
-        return applicationService.save(applicationDto);
-    }
+  @PatchMapping("/{publicId}")
+  public ApplicationDto updateApplication(
+      @PathVariable("publicId") Long publicId, @RequestBody Map<String, Object> fieldsValuesMap) {
+    return applicationService.update(publicId, fieldsValuesMap);
+  }
 
-    @PatchMapping("/{id}")
-    public ApplicationDto updateApplication(@PathVariable("id") Long id, @RequestBody Map<String, Object> fieldsValuesMap) {
-        return applicationService.update(id, fieldsValuesMap);
-    }
+  @GetMapping("/{publicId}")
+  public ApplicationDto getApplicationByPublicId(@PathVariable("publicId") String publicId) {
+    return applicationService.getApplicationByPublicId(publicId);
+  }
 
-    @DeleteMapping
-    public void deleteApplication(@PathVariable("id") Long id) {
-        applicationService.deleteById(id);
-    }
+  @GetMapping("/internal/{id}")
+  public ApplicationDto getApplicationById(@PathVariable("id") Long id) {
+    return applicationService.findById(id);
+  }
+
+  @DeleteMapping("/{publicId}")
+  public void deleteApplication(@PathVariable("publicId") String publicId) {
+    applicationService.deleteByPublicId(publicId);
+  }
 }

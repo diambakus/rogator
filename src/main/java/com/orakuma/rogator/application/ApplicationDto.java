@@ -10,4 +10,6 @@ public record ApplicationDto(
     String status,
     String created,
     Long requestedToUnitId,
-    String assigneeId) {}
+    String assigneeId,
+    Long serviceId,
+    String publicId) {}

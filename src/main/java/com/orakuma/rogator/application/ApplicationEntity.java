@@ -24,15 +24,18 @@ public class ApplicationEntity implements Serializable {
   @SequenceGenerator(name = "app_gen", sequenceName = "app_seq", allocationSize = 1)
   @ToString.Exclude
   private Long id;
+  private String publicId;
 
   private String name;
   private String email;
   private BigDecimal price;
+  private Long serviceId;
 
   @Enumerated(EnumType.STRING)
   private ApplicationStatus status;
 
   private LocalDateTime created;
+  private LocalDateTime expiresAt;
   private Long requestedToUnitId;
   private String assigneeId;
 }
