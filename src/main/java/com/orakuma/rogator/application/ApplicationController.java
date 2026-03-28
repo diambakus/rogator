@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+
 
 @RestController
 @RequestMapping(path = "applications")
@@ -23,24 +23,6 @@ public class ApplicationController {
   public List<ApplicationDto> getAllApplicationsByEmail(@PathVariable("email") String email) {
     return applicationService.findAllByEmail(email);
   }
-
-  // TODO: refactor it
-  /*
-  @GetMapping
-  public ApplicationDto getApplication(
-      @RequestParam(required = false, name = "publicId") String publicId,
-      @RequestParam(required = false, name = "name") String name,
-      @RequestParam(required = false, name = "id") Long id) {
-    if (StringUtils.isNotBlank(publicId)) {
-      return applicationService.getApplicationByPublicId(publicId);
-    } else if (StringUtils.isNotBlank(name)) {
-      return applicationService.findByName(name);
-    } else if (Objects.nonNull(id)) {
-      return applicationService.findById(id);
-    } else {
-      return null;
-    }
-  }*/
 
   @GetMapping
   public List<ApplicationDto> getAllApplications(

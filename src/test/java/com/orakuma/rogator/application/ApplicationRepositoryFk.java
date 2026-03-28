@@ -83,4 +83,19 @@ public class ApplicationRepositoryFk implements ApplicationRepository {
     public List<ApplicationEntity> findRelevantApplications(String employeeId, ApplicationStatus pending, ApplicationStatus created) {
         return List.of();
     }
+
+    @Override
+    public ApplicationEntity findByPublicId(String publicId) {
+        return null;
+    }
+
+    @Override
+    public void deleteByPublicId(String publicId) {
+
+    }
+
+    @Override
+    public int markAsAbandoned(List<ApplicationStatus> statuses, ApplicationStatus abandoned) {
+        return 0;
+    }
 }

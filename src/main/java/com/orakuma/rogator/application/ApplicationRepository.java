@@ -1,5 +1,6 @@
 package com.orakuma.rogator.application;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,16 @@ public interface ApplicationRepository extends CrudRepository<ApplicationEntity,
   ApplicationEntity findByPublicId(String publicId);
 
   void deleteByPublicId(String publicId);
+
+  @Modifying
+  @Query(
+"""
+ update ApplicationEntity app
+ set app.status = :abandoned
+ where app.status in :statuses
+ and app.expiresAt <= CURRENT_TIMESTAMP
+""")
+  int markAsAbandoned(
+      @Param("statuses") List<ApplicationStatus> statuses,
+      @Param("abandoned") ApplicationStatus abandoned);
 }
