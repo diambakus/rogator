@@ -73,12 +73,6 @@ public class ApplicationServiceImpl implements ApplicationService {
   }
 
   @Override
-  public ApplicationDto findByName(String name) {
-    ApplicationEntity applicationEntity = repositoriesHandler.getApplicationEntityByName(name);
-    return applicationMapper.toDto(applicationEntity);
-  }
-
-  @Override
   public List<ApplicationDto> findAllByEmail(String email) {
     List<ApplicationEntity> applicationEntities = applicationRepository.findByEmail(email);
     return applicationMapper.toDtos(applicationEntities);

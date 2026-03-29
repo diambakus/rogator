@@ -10,8 +10,6 @@ public interface ApplicationService {
 
   ApplicationDto findById(long id);
 
-  ApplicationDto findByName(String name);
-
   List<ApplicationDto> findAllByEmail(String email);
 
   List<ApplicationDto> getAllByEmailAndStatus(String email, String status);

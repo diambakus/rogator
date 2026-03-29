@@ -20,11 +20,6 @@ public class ApplicationServiceImplTest implements ApplicationService {
   }
 
   @Override
-  public ApplicationDto findByName(String name) {
-    return null;
-  }
-
-  @Override
   public List<ApplicationDto> findAllByEmail(String email) {
     return List.of();
   }
