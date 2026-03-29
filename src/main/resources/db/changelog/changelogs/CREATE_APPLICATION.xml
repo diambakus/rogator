@@ -56,4 +56,20 @@
             <column name="service_id" type="bigint"/>
         </addColumn>
     </changeSet>
+    <changeSet id="6" author="adruida">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="applications" columnName="name" schemaName="rogator" />
+        </preConditions>
+        <dropColumn tableName="applications" schemaName="rogator" columnName="name" />
+    </changeSet>
+    <changeSet id="7" author="adruida">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="applications" columnName="requestor_id" />
+            </not>
+        </preConditions>
+        <addColumn tableName="applications">
+            <column name="requestor_id" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

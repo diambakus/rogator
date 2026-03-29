@@ -54,8 +54,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             applicationEntity.setPrice((BigDecimal) value);
           } else if (StringUtils.isNotBlank(key) && StringUtils.equals(key, "status")) {
             applicationEntity.setStatus(ApplicationStatus.valueOf(value.toString()));
-          } else if (StringUtils.isNotBlank(key) && StringUtils.equals(key, "name")) {
-            applicationEntity.setName(String.valueOf(value));
           } else if (StringUtils.isNotBlank(key) && StringUtils.equals(key, "requestedToUnitId")) {
             applicationEntity.setRequestedToUnitId((Long) value);
           } else if (StringUtils.isNotBlank(key) && StringUtils.equals(key, "assigneeId")) {
@@ -125,5 +123,18 @@ public class ApplicationServiceImpl implements ApplicationService {
   @Transactional
   public void deleteByPublicId(String publicId) {
     applicationRepository.deleteByPublicId(publicId);
+  }
+
+  @Override
+  public List<ApplicationDto> getApplicationsForRequestorTrack(String requestorId) {
+    List<ApplicationStatus> statuses =
+        List.of(
+            ApplicationStatus.PROCESSING,
+            ApplicationStatus.ONGOING,
+            ApplicationStatus.PAID,
+            ApplicationStatus.PAYMENT_FAILED,
+            ApplicationStatus.APPROVED);
+    return applicationMapper.toDtos(
+        applicationRepository.findByRequestorIdAndStatus(requestorId, statuses));
   }
 }

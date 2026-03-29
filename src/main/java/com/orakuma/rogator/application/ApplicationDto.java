@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public record ApplicationDto(
     Long id,
-    String name,
+    String requestorId,
     String email,
     BigDecimal price,
     String status,

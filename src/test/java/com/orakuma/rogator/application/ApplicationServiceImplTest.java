@@ -53,7 +53,10 @@ public class ApplicationServiceImplTest implements ApplicationService {
   }
 
   @Override
-  public void deleteByPublicId(String publicId) {
+  public void deleteByPublicId(String publicId) {}
 
+  @Override
+  public List<ApplicationDto> getApplicationsForRequestorTrack(String requestorId) {
+    return List.of();
   }
 }

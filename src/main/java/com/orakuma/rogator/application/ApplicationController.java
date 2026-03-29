@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping(path = "applications")
 @AllArgsConstructor
@@ -27,11 +26,14 @@ public class ApplicationController {
   @GetMapping
   public List<ApplicationDto> getAllApplications(
       @RequestParam(required = false, name = "email") String email,
-      @RequestParam(required = false, name = "status") String status) {
+      @RequestParam(required = false, name = "status") String status,
+      @RequestParam(required = false, name = "requestorId") String requestorId) {
     if (!StringUtils.isBlank(status) && !StringUtils.isBlank(email)) {
       return applicationService.getAllByEmailAndStatus(email, status);
     } else if (StringUtils.isNotBlank(email)) {
       return applicationService.findAllByEmail(email);
+    } else if (StringUtils.isNotBlank(requestorId)) {
+      return applicationService.getApplicationsForRequestorTrack(requestorId);
     }
     return applicationService.getAll();
   }

@@ -98,4 +98,9 @@ public class ApplicationRepositoryFk implements ApplicationRepository {
     public int markAsAbandoned(List<ApplicationStatus> statuses, ApplicationStatus abandoned) {
         return 0;
     }
+
+    @Override
+    public List<ApplicationEntity> findByRequestorIdAndStatus(String requestorId, List<ApplicationStatus> statuses) {
+        return List.of();
+    }
 }

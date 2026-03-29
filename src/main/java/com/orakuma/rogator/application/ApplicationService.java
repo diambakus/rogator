@@ -25,4 +25,6 @@ public interface ApplicationService {
   ApplicationDto getApplicationByPublicId(String publicId);
 
   void deleteByPublicId(String publicId);
+
+  List<ApplicationDto> getApplicationsForRequestorTrack(String requestorId);
 }

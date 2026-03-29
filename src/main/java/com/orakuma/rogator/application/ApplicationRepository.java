@@ -44,4 +44,14 @@ public interface ApplicationRepository extends CrudRepository<ApplicationEntity,
   int markAsAbandoned(
       @Param("statuses") List<ApplicationStatus> statuses,
       @Param("abandoned") ApplicationStatus abandoned);
+
+  @Query(
+"""
+                select a from ApplicationEntity  a
+                where a.requestorId = :requestorId
+                and a.status in :statuses
+        """)
+  List<ApplicationEntity> findByRequestorIdAndStatus(
+          @Param("requestorId") String requestorId,
+          @Param("statuses") List<ApplicationStatus> statuses);
 }

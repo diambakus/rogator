@@ -26,7 +26,7 @@ public class ApplicationEntity implements Serializable {
   private Long id;
   private String publicId;
 
-  private String name;
+  private String requestorId;
   private String email;
   private BigDecimal price;
   private Long serviceId;
