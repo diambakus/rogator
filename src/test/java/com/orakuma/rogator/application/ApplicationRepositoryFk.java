@@ -65,11 +65,6 @@ public class ApplicationRepositoryFk implements ApplicationRepository {
     }
 
     @Override
-    public ApplicationEntity findByName(String name) {
-        return null;
-    }
-
-    @Override
     public List<ApplicationEntity> findByEmail(String email) {
         return List.of();
     }
