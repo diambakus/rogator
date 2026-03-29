@@ -8,8 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ApplicationRepository extends CrudRepository<ApplicationEntity, Long> {
-  ApplicationEntity findByName(String name);
-
   List<ApplicationEntity> findByEmail(String email);
 
   @Query("select a from ApplicationEntity a where a.email = :email and a.status = :status")
