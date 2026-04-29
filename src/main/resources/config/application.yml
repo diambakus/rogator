@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: rogator
+  devtools:
+    add-properties: false
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+    default-schema: rogator
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      connection-init-sql: SET search_path TO rogator
+      max-lifetime: 480000            #8m
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000            #5m
+      keepalive-time: 120000          #2m
+      connection-timeout: 30000       #30s
+  jpa:
+    show-sql: true
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+          format_sql: true
+          use_sql_comments: true
+          default_schema: rogator
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect #TODO: remove
+  sql:
+    init:
+      mode: always
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/realms/kumpo/protocol/openid-connect/certs
+  servlet:
+    multipart:
+      max-file-size: 128KB
+      max-request-size: 10MB
+      enabled: true
+      location: ${java.io.tmpdir}
+  profiles:
+    active: local
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+      base-path: /rogator
+
+app:
+  storage:
+    root: /data/uploads
+    attachmentsFolderName: applications-attachments
+  application:
+    expiresAt: 30 # user request expires 30 MIN after creation

@@ -16,6 +16,12 @@ public class ApplicationFormController {
     return applicationFormService.getApplicationForm(formId);
   }
 
+  @GetMapping(path = "/{applicationId}/{position}")
+  public ApplicationFormDto getApplicationForm(
+      @PathVariable("applicationId") Long applicationId, @PathVariable("position") int position) {
+    return applicationFormService.findApplicationForm(applicationId, position);
+  }
+
   @PostMapping(path = "/{applicationId}")
   public ApplicationFormDto createApplicationForm(
       @PathVariable("applicationId") Long applicationId,

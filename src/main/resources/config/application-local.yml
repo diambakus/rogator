@@ -1,0 +1,41 @@
+server:
+  port: 8091
+
+spring:
+  liquibase:
+    enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rogatordb
+    username: user
+    password: pass
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak.orakuma.de/realms/kumpo/protocol/openid-connect/certs
+  servlet:
+    multipart:
+      max-file-size: 1MB
+#  security:
+#    user:
+#      roles: xxx
+logging:
+  level:
+    liquibase: DEBUG
+    org:
+      liquibase: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
+springdoc:
+  swagger-ui:
+    path: swagger-ui.html
+
+app:
+  storage:
+    root: /home/adruida/dev/uploads
+    attachmentsFolderName: applications-attachments

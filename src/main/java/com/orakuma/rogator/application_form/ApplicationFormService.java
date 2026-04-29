@@ -10,4 +10,5 @@ public interface ApplicationFormService {
     ApplicationFormDto save(Long applicationId, ApplicationFormDto applicationFormDto);
     ApplicationFormDto getApplicationForm(Long formId);
     void deleteApplicationForm(Long formId);
+    ApplicationFormDto findApplicationForm(Long applicationId, int position);
 }

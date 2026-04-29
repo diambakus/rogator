@@ -3,7 +3,7 @@ package com.orakuma.rogator.application_form;
 import com.orakuma.rogator.application.ApplicationEntity;
 import com.orakuma.rogator.utils.RepositoriesHandler;
 import lombok.AllArgsConstructor;
-import org.mapstruct.factory.Mappers;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +13,7 @@ import java.util.Objects;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ApplicationFormServiceImpl implements ApplicationFormService {
     private final ApplicationFormRepository applicationFormRepository;
     private final ApplicationFormMapper applicationFormMapper;
@@ -58,6 +59,13 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     public void deleteApplicationForm(Long formId) {
         ApplicationFormEntity formEntity = repositoriesHandler.getApplicationFormEntityById(formId);
         applicationFormRepository.delete(formEntity);
+    }
+
+    @Override
+    public ApplicationFormDto findApplicationForm(Long applicationId, int position) {
+        log.info("Client requests application form.");
+        ApplicationFormEntity formEntity = applicationFormRepository.findByApplicationIdAndPosition(applicationId, position);
+        return applicationFormMapper.toDto(formEntity);
     }
 
     @Override

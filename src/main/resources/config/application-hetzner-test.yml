@@ -1,0 +1,12 @@
+spring:
+  liquibase:
+    enabled: true
+  datasource:
+    url: jdbc:postgresql://IP:5432/rogator_db
+    username: user
+    password: pass
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/kumpo/protocol/openid-connect/certs

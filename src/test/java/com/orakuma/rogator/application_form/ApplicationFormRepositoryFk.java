@@ -78,4 +78,14 @@ public class ApplicationFormRepositoryFk implements ApplicationFormRepository {
     public List<ApplicationFormEntity> findAllByApplicationId(Long applicationId) {
         return List.of();
     }
+
+    @Override
+    public List<ApplicationFormEntity> findApplicationFormEntitiesByApplicationPublicId(String applicationPublicId) {
+        return List.of();
+    }
+
+    @Override
+    public ApplicationFormEntity findByApplicationIdAndPosition(Long applicationId, int position) {
+        return null;
+    }
 }
