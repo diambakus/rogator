@@ -3,13 +3,15 @@ package com.orakuma.rogator.application;
 import java.math.BigDecimal;
 
 public record ApplicationDto(
-    Long id,
-    String requestorId,
-    String email,
-    BigDecimal price,
-    String status,
-    String created,
-    Long requestedToUnitId,
-    String assigneeId,
-    Long serviceId,
-    String publicId) {}
+        Long id,
+        String requestorId,
+        String email,
+        BigDecimal price,
+        String status,
+        String created,
+        Long requestedToUnitId,
+        String assigneeId,
+        Long serviceId,
+        String publicId,
+        String name) {
+}

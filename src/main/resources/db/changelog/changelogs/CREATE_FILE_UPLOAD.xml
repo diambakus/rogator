@@ -6,7 +6,6 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="1" author="adruida">
-        <!-- Create the sequence for the organs table -->
         <createSequence sequenceName="app_seq" startValue="1" incrementBy="1"/>
 
         <createTable tableName="file_upload" schemaName="${schemaName}">
@@ -28,15 +27,15 @@
     <changeSet id="2" author="adruida">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="file_upload"/>
-            <columnExists tableName="file_upload" columnName="fileName"/>
+            <columnExists tableName="file_upload" columnName="file_name"/>
         </preConditions>
-        <renameTable oldTableName="file_upload" newTableName="files_locations" />
-        <renameColumn tableName="files_locations" oldColumnName="fileName" newColumnName="filename" columnDataType="text"/>
+        <renameTable oldTableName="file_upload" newTableName="files_locations"/>
+        <renameColumn tableName="files_locations" oldColumnName="file_name" newColumnName="filename" columnDataType="varchar(255)"/>
     </changeSet>
 
     <changeSet id="3" author="adruida">
-        <preConditions>
-            <tableExists tableName="files_locations" />
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="files_locations"/>
         </preConditions>
         <addColumn tableName="files_locations">
             <column name="stored_filename" type="text"/>
@@ -47,7 +46,7 @@
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="file_upload"/>
         </preConditions>
-        <delete tableName="file_upload" schemaName="${schemaName}" />
+        <delete tableName="file_upload" schemaName="${schemaName}"/>
     </changeSet>
 
 </databaseChangeLog>

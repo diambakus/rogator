@@ -84,4 +84,14 @@
         </createIndex>
         <addUniqueConstraint tableName="applications" columnNames="public_id" constraintName="uk_applications_public_id" />
     </changeSet>
+    <changeSet id="9" author="adruida">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="applications" columnName="name" />
+            </not>
+        </preConditions>
+        <addColumn tableName="applications">
+            <column name="name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

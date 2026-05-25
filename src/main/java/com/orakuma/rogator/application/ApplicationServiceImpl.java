@@ -39,6 +39,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     applicationEntity.setPublicId(String.format("app_%s", UUID.randomUUID()));
     applicationEntity.setCreated(LocalDateTime.now());
     applicationEntity.setExpiresAt(LocalDateTime.now().plusMinutes(userRequestExpiresAt));
+    applicationEntity.setStatus(ApplicationStatus.CREATED);
     applicationEntity = applicationRepository.save(applicationEntity);
     return applicationMapper.toDto(applicationEntity);
   }

@@ -17,25 +17,26 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "applications", schema = "rogator")
 public class ApplicationEntity implements Serializable {
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_gen")
-  @SequenceGenerator(name = "app_gen", sequenceName = "app_seq", allocationSize = 1)
-  @ToString.Exclude
-  private Long id;
-  private String publicId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_gen")
+    @SequenceGenerator(name = "app_gen", sequenceName = "app_seq", allocationSize = 1)
+    @ToString.Exclude
+    private Long id;
+    private String publicId;
 
-  private String requestorId;
-  private String email;
-  private BigDecimal price;
-  private Long serviceId;
+    private String requestorId;
+    private String email;
+    private BigDecimal price;
+    private Long serviceId;
 
-  @Enumerated(EnumType.STRING)
-  private ApplicationStatus status;
+    @Enumerated(EnumType.STRING)
+    private ApplicationStatus status;
 
-  private LocalDateTime created;
-  private LocalDateTime expiresAt;
-  private Long requestedToUnitId;
-  private String assigneeId;
+    private LocalDateTime created;
+    private LocalDateTime expiresAt;
+    private Long requestedToUnitId;
+    private String assigneeId;
+    private String name;
 }
