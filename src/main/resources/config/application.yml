@@ -29,7 +29,6 @@ spring:
           default_schema: rogator
     hibernate:
       ddl-auto: update
-    database-platform: org.hibernate.dialect.PostgreSQLDialect #TODO: remove
   sql:
     init:
       mode: always
