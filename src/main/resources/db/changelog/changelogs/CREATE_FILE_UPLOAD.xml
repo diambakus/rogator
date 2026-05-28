@@ -2,51 +2,299 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1" author="adruida">
-        <createSequence sequenceName="app_seq" startValue="1" incrementBy="1"/>
+    <!-- ================================================================= -->
+    <!-- CHANGESET 1 - CREATE SEQUENCE                                     -->
+    <!-- ================================================================= -->
 
-        <createTable tableName="file_upload" schemaName="${schemaName}">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true"/>
+    <changeSet id="1-create-file-location-seq"
+               author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <not>
+                <sequenceExists
+                        sequenceName="app_seq"
+                        schemaName="${schemaName}"/>
+            </not>
+
+        </preConditions>
+
+        <createSequence
+                sequenceName="app_seq"
+                schemaName="${schemaName}"
+                startValue="1"
+                incrementBy="1"/>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 2 - CREATE TABLE                                        -->
+    <!-- ================================================================= -->
+
+    <changeSet id="2-create-file-upload-table"
+               author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <not>
+                <tableExists
+                        tableName="file_upload"
+                        schemaName="${schemaName}"/>
+            </not>
+
+        </preConditions>
+
+        <createTable
+                tableName="file_upload"
+                schemaName="${schemaName}">
+
+            <column name="id"
+                    type="BIGINT"
+                    autoIncrement="true">
+
+                <constraints
+                        primaryKey="true"
+                        nullable="false"/>
+
             </column>
-            <column name="application_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_file_upload_application"
-                             references="applications(id)"/>
+
+            <column name="application_id"
+                    type="BIGINT">
+
+                <constraints nullable="false"/>
+
             </column>
-            <column name="file_name" type="varchar(255)"/>
-            <column name="file_type" type="varchar(50)"/>
-            <column name="file_size" type="bigint"/>
-            <column name="file_path" type="text"/>
-            <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="file_name"
+                    type="VARCHAR(255)"/>
+
+            <column name="file_type"
+                    type="VARCHAR(50)"/>
+
+            <column name="file_size"
+                    type="BIGINT"/>
+
+            <column name="file_path"
+                    type="TEXT"/>
+
+            <column name="created"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
         </createTable>
+
     </changeSet>
 
-    <changeSet id="2" author="adruida">
+    <!-- ================================================================= -->
+    <!-- CHANGESET 3 - FOREIGN KEY                                         -->
+    <!-- ================================================================= -->
+
+    <changeSet id="3-add-file-upload-application-fk"
+               author="adruida">
+
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="file_upload"/>
-            <columnExists tableName="file_upload" columnName="file_name"/>
+
+            <tableExists
+                    tableName="file_upload"
+                    schemaName="${schemaName}"/>
+
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
+            <columnExists
+                    tableName="file_upload"
+                    schemaName="${schemaName}"
+                    columnName="application_id"/>
+
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="fk_file_upload_application"/>
+            </not>
+
         </preConditions>
-        <renameTable oldTableName="file_upload" newTableName="files_locations"/>
-        <renameColumn tableName="files_locations" oldColumnName="file_name" newColumnName="filename" columnDataType="varchar(255)"/>
+
+        <addForeignKeyConstraint
+                baseTableSchemaName="${schemaName}"
+                baseTableName="file_upload"
+                baseColumnNames="application_id"
+
+                referencedTableSchemaName="${schemaName}"
+                referencedTableName="applications"
+                referencedColumnNames="id"
+
+                constraintName="fk_file_upload_application"
+
+                onDelete="CASCADE"
+                onUpdate="RESTRICT"/>
+
     </changeSet>
 
-    <changeSet id="3" author="adruida">
+    <!-- ================================================================= -->
+    <!-- CHANGESET 4 - INDEX application_id                                -->
+    <!-- ================================================================= -->
+
+    <changeSet id="4-create-file-upload-application-id-index"
+               author="adruida">
+
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="files_locations"/>
+
+            <tableExists
+                    tableName="file_upload"
+                    schemaName="${schemaName}"/>
+
+            <columnExists
+                    tableName="file_upload"
+                    schemaName="${schemaName}"
+                    columnName="application_id"/>
+
+            <not>
+                <indexExists
+                        tableName="file_upload"
+                        schemaName="${schemaName}"
+                        indexName="idx_file_upload_application_id"/>
+            </not>
+
         </preConditions>
-        <addColumn tableName="files_locations">
-            <column name="stored_filename" type="text"/>
+
+        <createIndex
+                tableName="file_upload"
+                schemaName="${schemaName}"
+                indexName="idx_file_upload_application_id">
+
+            <column name="application_id"/>
+
+        </createIndex>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 5 - RENAME TABLE                                        -->
+    <!-- ================================================================= -->
+
+    <changeSet id="5-rename-file-upload-table"
+               author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="file_upload"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <tableExists
+                        tableName="files_locations"
+                        schemaName="${schemaName}"/>
+            </not>
+
+        </preConditions>
+
+        <renameTable
+                oldTableName="file_upload"
+                newTableName="files_locations"
+                schemaName="${schemaName}"/>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 6 - RENAME file_name COLUMN                             -->
+    <!-- ================================================================= -->
+
+    <changeSet id="6-rename-file-name-column"
+               author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="files_locations"
+                    schemaName="${schemaName}"/>
+
+            <columnExists
+                    tableName="files_locations"
+                    schemaName="${schemaName}"
+                    columnName="file_name"/>
+
+            <not>
+                <columnExists
+                        tableName="files_locations"
+                        schemaName="${schemaName}"
+                        columnName="filename"/>
+            </not>
+
+        </preConditions>
+
+        <renameColumn
+                tableName="files_locations"
+                schemaName="${schemaName}"
+
+                oldColumnName="file_name"
+                newColumnName="filename"
+
+                columnDataType="VARCHAR(255)"/>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 7 - ADD stored_filename                                 -->
+    <!-- ================================================================= -->
+
+    <changeSet id="7-add-stored-filename-column"
+               author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="files_locations"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <columnExists
+                        tableName="files_locations"
+                        schemaName="${schemaName}"
+                        columnName="stored_filename"/>
+            </not>
+
+        </preConditions>
+
+        <addColumn
+                tableName="files_locations"
+                schemaName="${schemaName}">
+
+            <column
+                    name="stored_filename"
+                    type="TEXT"/>
+
         </addColumn>
+
     </changeSet>
 
-    <changeSet id="4" author="adruida">
+    <!-- ================================================================= -->
+    <!-- CHANGESET 8 - CLEANUP OLD TABLE                                   -->
+    <!-- ================================================================= -->
+
+    <changeSet id="8-drop-legacy-file-upload-table"
+               author="adruida">
+
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="file_upload"/>
+
+            <tableExists
+                    tableName="file_upload"
+                    schemaName="${schemaName}"/>
+
+            <tableExists
+                    tableName="files_locations"
+                    schemaName="${schemaName}"/>
+
         </preConditions>
-        <delete tableName="file_upload" schemaName="${schemaName}"/>
+
+        <dropTable
+                tableName="file_upload"
+                schemaName="${schemaName}"/>
+
     </changeSet>
 
 </databaseChangeLog>

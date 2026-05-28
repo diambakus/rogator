@@ -1,97 +1,391 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1" author="adruida">
-        <!-- Create the sequence for the organs table -->
-        <createSequence sequenceName="app_seq" startValue="1" incrementBy="1"/>
+    <!-- ================================================================= -->
+    <!-- CHANGESET 1 - CREATE SEQUENCE                                     -->
+    <!-- ================================================================= -->
 
-        <createTable tableName="applications" schemaName="${schemaName}">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true"/>
+    <changeSet id="1-create-app-seq" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists
+                        sequenceName="app_seq"
+                        schemaName="${schemaName}"/>
+            </not>
+        </preConditions>
+
+        <createSequence
+                sequenceName="app_seq"
+                schemaName="${schemaName}"
+                startValue="1"
+                incrementBy="1"/>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 2 - CREATE TABLE                                        -->
+    <!-- ================================================================= -->
+
+    <changeSet id="2-create-applications-table" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists
+                        tableName="applications"
+                        schemaName="${schemaName}"/>
+            </not>
+        </preConditions>
+
+        <createTable
+                tableName="applications"
+                schemaName="${schemaName}">
+
+            <column name="id"
+                    type="BIGINT"
+                    autoIncrement="true">
+                <constraints
+                        primaryKey="true"
+                        nullable="false"/>
             </column>
-            <column name="name" type="varchar(255)"/>
-            <column name="email" type="varchar(255)"/>
-            <column name="price" type="decimal"/>
-            <column name="status" type="varchar(10)"/>
-            <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="name" type="VARCHAR(255)"/>
+
+            <column name="email" type="VARCHAR(255)"/>
+
+            <column name="price" type="DECIMAL(19,2)"/>
+
+            <column name="status" type="VARCHAR(10)"/>
+
+            <column name="created"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
         </createTable>
-    </changeSet>
-    <changeSet id="2" author="adruida">
-        <preConditions>
-            <tableExists tableName="applications"/>
-        </preConditions>
-        <addColumn tableName="applications">
-            <column name="requested_to_unit_id" type="bigint"/>
-        </addColumn>
-    </changeSet>
-    <changeSet id="3" author="adruida">
-        <preConditions>
-            <tableExists tableName="applications"/>
-        </preConditions>
-        <addColumn tableName="applications">
-            <column name="assign_to" type="varchar(255)"/>
-        </addColumn>
-    </changeSet>
-    <changeSet id="4" author="adruida">
-        <preConditions>
-            <columnExists tableName="applications" columnName="assign_to"/>
-        </preConditions>
-        <renameColumn tableName="applications" oldColumnName="assign_to" newColumnName="assignee_id"/>
-    </changeSet>
-    <changeSet id="5" author="adruida">
-        <preConditions>
-            <not>
-                <columnExists tableName="applications" columnName="expires_at" />
-                <columnExists tableName="applications" columnName="public_id" />
-                <columnExists tableName="applications" columnName="service_id" />
-            </not>
-        </preConditions>
-        <addColumn tableName="applications">
-            <column name="expires_at" type="timestamp" />
-            <column name="public_id" type="bigint" />
-            <column name="service_id" type="bigint"/>
-        </addColumn>
-    </changeSet>
-    <changeSet id="6" author="adruida">
-        <preConditions onFail="MARK_RAN">
-            <columnExists tableName="applications" columnName="name" schemaName="rogator" />
-        </preConditions>
-        <dropColumn tableName="applications" schemaName="rogator" columnName="name" />
-    </changeSet>
-    <changeSet id="7" author="adruida">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <columnExists tableName="applications" columnName="requestor_id" />
-            </not>
-        </preConditions>
-        <addColumn tableName="applications">
-            <column name="requestor_id" type="varchar(255)"/>
-        </addColumn>
+
     </changeSet>
 
-    <changeSet id="8" author="adruida">
+    <!-- ================================================================= -->
+    <!-- CHANGESET 3 - requested_to_unit_id                                -->
+    <!-- ================================================================= -->
+
+    <changeSet id="3-add-requested-to-unit-id" author="adruida">
+
         <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
             <not>
-                <indexExists tableName="applications" indexName="idx_applications_public_id"/>
+                <columnExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        columnName="requested_to_unit_id"/>
             </not>
+
         </preConditions>
-        <createIndex tableName="applications" indexName="idx_applications_public_id">
-            <column name="public_id"/>
-        </createIndex>
-        <addUniqueConstraint tableName="applications" columnNames="public_id" constraintName="uk_applications_public_id" />
-    </changeSet>
-    <changeSet id="9" author="adruida">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <columnExists tableName="applications" columnName="name" />
-            </not>
-        </preConditions>
-        <addColumn tableName="applications">
-            <column name="name" type="varchar(255)"/>
+
+        <addColumn
+                tableName="applications"
+                schemaName="${schemaName}">
+
+            <column
+                    name="requested_to_unit_id"
+                    type="BIGINT"/>
+
         </addColumn>
+
     </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 4 - assignee_id                                         -->
+    <!-- ================================================================= -->
+
+    <changeSet id="4-add-assignee-id" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <columnExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        columnName="assignee_id"/>
+            </not>
+
+        </preConditions>
+
+        <addColumn
+                tableName="applications"
+                schemaName="${schemaName}">
+
+            <column
+                    name="assignee_id"
+                    type="VARCHAR(255)"/>
+
+        </addColumn>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 5 - expires_at                                          -->
+    <!-- ================================================================= -->
+
+    <changeSet id="5-add-expires-at" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <columnExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        columnName="expires_at"/>
+            </not>
+
+        </preConditions>
+
+        <addColumn
+                tableName="applications"
+                schemaName="${schemaName}">
+
+            <column
+                    name="expires_at"
+                    type="TIMESTAMP"/>
+
+        </addColumn>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 6 - public_id                                           -->
+    <!-- ================================================================= -->
+
+    <changeSet id="6-add-public-id" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <columnExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        columnName="public_id"/>
+            </not>
+
+        </preConditions>
+
+        <addColumn
+                tableName="applications"
+                schemaName="${schemaName}">
+
+            <column
+                    name="public_id"
+                    type="BIGINT"/>
+
+        </addColumn>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 7 - service_id                                          -->
+    <!-- ================================================================= -->
+
+    <changeSet id="7-add-service-id" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <columnExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        columnName="service_id"/>
+            </not>
+
+        </preConditions>
+
+        <addColumn
+                tableName="applications"
+                schemaName="${schemaName}">
+
+            <column
+                    name="service_id"
+                    type="BIGINT"/>
+
+        </addColumn>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 8 - DROP OLD NAME COLUMN                                -->
+    <!-- ================================================================= -->
+
+    <changeSet id="8-drop-name-column" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <columnExists
+                    tableName="applications"
+                    schemaName="${schemaName}"
+                    columnName="name"/>
+
+        </preConditions>
+
+        <dropColumn
+                tableName="applications"
+                schemaName="${schemaName}"
+                columnName="name"/>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 9 - requestor_id                                        -->
+    <!-- ================================================================= -->
+
+    <changeSet id="9-add-requestor-id" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <columnExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        columnName="requestor_id"/>
+            </not>
+
+        </preConditions>
+
+        <addColumn
+                tableName="applications"
+                schemaName="${schemaName}">
+
+            <column
+                    name="requestor_id"
+                    type="VARCHAR(255)"/>
+
+        </addColumn>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 10 - INDEX public_id                                    -->
+    <!-- ================================================================= -->
+
+    <changeSet id="10-create-public-id-index" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <columnExists
+                    tableName="applications"
+                    schemaName="${schemaName}"
+                    columnName="public_id"/>
+
+            <not>
+                <indexExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        indexName="idx_applications_public_id"/>
+            </not>
+
+        </preConditions>
+
+        <createIndex
+                tableName="applications"
+                schemaName="${schemaName}"
+                indexName="idx_applications_public_id">
+
+            <column name="public_id"/>
+
+        </createIndex>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 11 - UNIQUE public_id                                   -->
+    <!-- ================================================================= -->
+
+    <changeSet id="11-add-public-id-unique-constraint"
+               author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <columnExists
+                    tableName="applications"
+                    schemaName="${schemaName}"
+                    columnName="public_id"/>
+
+            <not>
+                <uniqueConstraintExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        constraintName="uk_applications_public_id"/>
+            </not>
+
+        </preConditions>
+
+        <addUniqueConstraint
+                tableName="applications"
+                schemaName="${schemaName}"
+                columnNames="public_id"
+                constraintName="uk_applications_public_id"/>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 12 - RECREATE name COLUMN                               -->
+    <!-- ================================================================= -->
+
+    <changeSet id="12-recreate-name-column" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <columnExists
+                        tableName="applications"
+                        schemaName="${schemaName}"
+                        columnName="name"/>
+            </not>
+
+        </preConditions>
+
+        <addColumn
+                tableName="applications"
+                schemaName="${schemaName}">
+
+            <column
+                    name="name"
+                    type="VARCHAR(255)"/>
+
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>
