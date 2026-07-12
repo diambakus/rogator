@@ -38,7 +38,7 @@ public class ApplicationServiceImplTest implements ApplicationService {
   }
 
   @Override
-  public List<ApplicationDto> getAllRelevantApplications(String employeeId) {
+  public List<ApplicationDto> getAllRelevantApplications(String employeeId, Long unitId) {
     return List.of();
   }
 

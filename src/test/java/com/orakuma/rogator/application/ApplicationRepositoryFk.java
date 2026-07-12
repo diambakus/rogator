@@ -75,7 +75,11 @@ public class ApplicationRepositoryFk implements ApplicationRepository {
     }
 
     @Override
-    public List<ApplicationEntity> findRelevantApplications(String employeeId, ApplicationStatus pending, ApplicationStatus created) {
+    public List<ApplicationEntity> findRelevantApplications(
+            String employeeId,
+            Long unitId,
+            ApplicationStatus pending,
+            ApplicationStatus created) {
         return List.of();
     }
 

@@ -38,10 +38,11 @@ public class ApplicationController {
     return applicationService.getAll();
   }
 
-  @GetMapping("/display-after-login/{employeeId}")
+  @GetMapping("/display-after-login")
   public List<ApplicationDto> getInitialRelevantApplicationsForEmployee(
-      @PathVariable("employeeId") String employeeId) {
-    return applicationService.getAllRelevantApplications(employeeId);
+      @RequestParam(name = "employeeId") String employeeId,
+      @RequestParam(name = "unitId") Long unitsId) {
+    return applicationService.getAllRelevantApplications(employeeId, unitsId);
   }
 
   @PostMapping

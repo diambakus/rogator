@@ -18,7 +18,7 @@ public interface ApplicationService {
 
   List<ApplicationDto> getAll();
 
-  List<ApplicationDto> getAllRelevantApplications(String employeeId);
+  List<ApplicationDto> getAllRelevantApplications(String employeeId, Long unitId);
 
   ApplicationDto getApplicationByPublicId(String publicId);
 

@@ -1,8 +1,9 @@
 package com.orakuma.rogator.application;
 
 import com.orakuma.rogator.utils.RepositoriesHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ApplicationServiceImpl implements ApplicationService {
 
   private final ApplicationRepository applicationRepository;
@@ -24,13 +27,6 @@ public class ApplicationServiceImpl implements ApplicationService {
 
   @Value("${app.application.expiresAt}")
   private long userRequestExpiresAt;
-
-  public ApplicationServiceImpl(
-      ApplicationRepository applicationRepository, RepositoriesHandler repositoriesHandler) {
-    this.applicationRepository = applicationRepository;
-    this.repositoriesHandler = repositoriesHandler;
-    this.applicationMapper = Mappers.getMapper(ApplicationMapper.class);
-  }
 
   @Override
   @Transactional
@@ -101,10 +97,13 @@ public class ApplicationServiceImpl implements ApplicationService {
   }
 
   @Override
-  public List<ApplicationDto> getAllRelevantApplications(String employeeId) {
+  public List<ApplicationDto> getAllRelevantApplications(String employeeId, Long unitId) {
     List<ApplicationEntity> applicationEntities =
         applicationRepository.findRelevantApplications(
-            employeeId, ApplicationStatus.PROCESSING, ApplicationStatus.CREATED);
+            employeeId,
+            unitId,
+            ApplicationStatus.PROCESSING,
+            ApplicationStatus.CREATED);
     return applicationMapper.toDtos(applicationEntities);
   }
 
