@@ -13,5 +13,6 @@ public record ApplicationDto(
         String assigneeId,
         Long serviceId,
         String publicId,
-        String name) {
+        String name,
+        String trackingCode) {
 }

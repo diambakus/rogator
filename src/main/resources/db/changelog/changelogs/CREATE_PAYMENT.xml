@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 1 - CREATE PAYMENTS TABLE                               -->
+    <!-- ================================================================= -->
+
+    <changeSet id="1-create-payments-table" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="payments" schemaName="${schemaName}"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="payments" schemaName="${schemaName}">
+
+            <column name="application_id" type="BIGINT">
+                <constraints primaryKey="true"
+                             nullable="false"
+                             primaryKeyName="pk_payments"/>
+            </column>
+
+            <column name="order_id" type="VARCHAR(255)">
+                <constraints nullable="false"
+                             unique="true"
+                             uniqueConstraintName="uk_payments_order_id"/>
+            </column>
+
+            <column name="payment_type" type="VARCHAR(50)"/>
+
+            <column name="amount" type="DECIMAL(19,2)"/>
+
+            <column name="created" type="TIMESTAMP"/>
+
+            <column name="updated" type="TIMESTAMP"/>
+
+        </createTable>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 2 - ADD FOREIGN KEY CONSTRAINT                          -->
+    <!-- ================================================================= -->
+
+    <changeSet id="2-add-payments-application-fk" author="adruida">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="payments" schemaName="${schemaName}"/>
+            <tableExists tableName="applications" schemaName="${schemaName}"/>
+            <not>
+                <foreignKeyConstraintExists
+                        schemaName="${schemaName}"
+                        foreignKeyTableName="payments"
+                        foreignKeyName="fk_payments_application_id"/>
+            </not>
+        </preConditions>
+
+        <addForeignKeyConstraint
+                baseTableSchemaName="${schemaName}"
+                baseTableName="payments"
+                baseColumnNames="application_id"
+                referencedTableSchemaName="${schemaName}"
+                referencedTableName="applications"
+                referencedColumnNames="id"
+                constraintName="fk_payments_application_id"
+                onDelete="CASCADE"/>
+
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 3 - delete price COLUMN                               -->
+    <!-- ================================================================= -->
+    <changeSet id="3-delete-price-column" author="adruida">
+        <preConditions onFail="MARK_RAN">
+
+            <columnExists
+                    tableName="applications"
+                    schemaName="${schemaName}"
+                    columnName="price"/>
+
+        </preConditions>
+
+        <dropColumn
+                tableName="applications"
+                schemaName="${schemaName}"
+                columnName="price"/>
+    </changeSet>
+
+</databaseChangeLog>

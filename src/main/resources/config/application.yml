@@ -45,6 +45,21 @@ spring:
       location: ${java.io.tmpdir}
   profiles:
     active: local
+  mail:
+    host: ${mail-config.host}
+    port: ${mail-config.port}
+    username: ${mail-config.user.email}
+    password: ${mail-config.user.password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 management:
   endpoints:
@@ -58,4 +73,26 @@ app:
     root: /data/uploads
     attachmentsFolderName: applications-attachments
   application:
-    expiresAt: 30 # user request expires 30 MIN after creation
+    creation:
+      durability: 3600 # 6 hours
+
+#Payment details
+payment:
+  paypal:
+    mode: <mode>
+    client-id: <clientId>
+    client-secret: <clientSecret>
+    currency-code: <currencyCode>
+
+#Jobs
+cron:
+  change-application-status: 0 0 * * * *
+
+#Email
+mail-config:
+  host: <host>
+  port: 001
+  user:
+    email: <email>
+    username: <username>
+    password: <password>

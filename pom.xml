@@ -42,6 +42,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <shedlock.version>7.7.0</shedlock.version>
+        <versions.paypal-checkout-sdk>2.0.0</versions.paypal-checkout-sdk>
+        <versions.nano-id>2.0.0</versions.nano-id>
     </properties>
     <dependencies>
         <dependency>
@@ -67,6 +69,10 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
@@ -126,6 +132,25 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Payment API -->
+        <dependency>
+            <groupId>com.paypal.sdk</groupId>
+            <artifactId>paypal-server-sdk</artifactId>
+            <version>${versions.paypal-checkout-sdk}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.paypal.sdk</groupId>
+            <artifactId>checkout-sdk</artifactId>
+            <version>${versions.paypal-checkout-sdk}</version>
+        </dependency>
+        <!-- Nano ID -->
+        <dependency>
+            <groupId>com.aventrix.jnanoid</groupId>
+            <artifactId>jnanoid</artifactId>
+            <version>${versions.nano-id}</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 
     <profiles>

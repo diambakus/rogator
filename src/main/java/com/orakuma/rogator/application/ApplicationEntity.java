@@ -35,8 +35,9 @@ public class ApplicationEntity implements Serializable {
     private ApplicationStatus status;
 
     private LocalDateTime created;
-    private LocalDateTime expiresAt;
     private Long requestedToUnitId;
     private String assigneeId;
     private String name;
+    @Column(updatable = false)
+    private String trackingCode;
 }

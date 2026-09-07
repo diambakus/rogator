@@ -1,10 +1,11 @@
 package com.orakuma.rogator.application;
 
 import com.orakuma.rogator.utils.RepositoriesHandler;
+import com.orakuma.rogator.utils.TrackingCodeUtils;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,16 +26,13 @@ public class ApplicationServiceImpl implements ApplicationService {
   private final ApplicationMapper applicationMapper;
   private final RepositoriesHandler repositoriesHandler;
 
-  @Value("${app.application.expiresAt}")
-  private long userRequestExpiresAt;
-
   @Override
   @Transactional
   public ApplicationDto save(ApplicationDto applicationDto) {
     ApplicationEntity applicationEntity = applicationMapper.toEntity(applicationDto);
     applicationEntity.setPublicId(String.format("app_%s", UUID.randomUUID()));
     applicationEntity.setCreated(LocalDateTime.now());
-    applicationEntity.setExpiresAt(LocalDateTime.now().plusMinutes(userRequestExpiresAt));
+    applicationEntity.setTrackingCode(TrackingCodeUtils.generate(6));
     applicationEntity.setStatus(ApplicationStatus.CREATED);
     applicationEntity = applicationRepository.save(applicationEntity);
     return applicationMapper.toDto(applicationEntity);
@@ -100,16 +98,15 @@ public class ApplicationServiceImpl implements ApplicationService {
   public List<ApplicationDto> getAllRelevantApplications(String employeeId, Long unitId) {
     List<ApplicationEntity> applicationEntities =
         applicationRepository.findRelevantApplications(
-            employeeId,
-            unitId,
-            ApplicationStatus.PROCESSING,
-            ApplicationStatus.CREATED);
+            employeeId, unitId, ApplicationStatus.PROCESSING, ApplicationStatus.CREATED);
     return applicationMapper.toDtos(applicationEntities);
   }
 
   @Override
   public ApplicationDto getApplicationByPublicId(String publicId) {
-    ApplicationEntity applicationEntity = applicationRepository.findByPublicId(publicId);
+    ApplicationEntity applicationEntity = applicationRepository
+            .findByPublicId(publicId)
+            .orElseThrow(()-> new EntityNotFoundException("Application not found for ID:" + publicId));
     return applicationMapper.toDto(applicationEntity);
   }
 
@@ -123,6 +120,7 @@ public class ApplicationServiceImpl implements ApplicationService {
   public List<ApplicationDto> getApplicationsForRequestorTrack(String requestorId) {
     List<ApplicationStatus> statuses =
         List.of(
+            ApplicationStatus.CREATED,
             ApplicationStatus.PROCESSING,
             ApplicationStatus.ONGOING,
             ApplicationStatus.PAID,

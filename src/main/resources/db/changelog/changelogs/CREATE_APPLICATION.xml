@@ -388,4 +388,49 @@
 
     </changeSet>
 
+    <!-- ================================================================= -->
+    <!-- CHANGESET 13 - ADD trackingCode COLUMN                               -->
+    <!-- ================================================================= -->
+    <changeSet id="13-add-code-column" author="adruida">
+        <preConditions>
+            <tableExists
+                    tableName="applications"
+                    schemaName="${schemaName}"/>
+
+            <not>
+                <columnExists
+                        tableName="applications"
+                        columnName="tracking_code"
+                        schemaName="${schemaName}"/>
+            </not>
+        </preConditions>
+
+        <addColumn
+                tableName="applications"
+                schemaName="${schemaName}">
+            <column
+                    name="tracking_code"
+                    type="varchar(6)"
+            />
+        </addColumn>
+    </changeSet>
+    <!-- ================================================================= -->
+    <!-- CHANGESET 14 - delete expire_at COLUMN                               -->
+    <!-- ================================================================= -->
+    <changeSet id="14-delete-expire-column" author="adruida">
+        <preConditions onFail="MARK_RAN">
+
+            <columnExists
+                    tableName="applications"
+                    schemaName="${schemaName}"
+                    columnName="expires_at"/>
+
+        </preConditions>
+
+        <dropColumn
+                tableName="applications"
+                schemaName="${schemaName}"
+                columnName="expires_at"/>
+    </changeSet>
+
 </databaseChangeLog>

@@ -9,4 +9,5 @@
     <include file="changelogs/CREATE_APPLICATION.xml" relativeToChangelogFile="true" />
     <include file="changelogs/CREATE_APPLICATION_FORM.xml" relativeToChangelogFile="true" />
     <include file="changelogs/CREATE_FILE_UPLOAD.xml" relativeToChangelogFile="true" />
+    <include file="changelogs/CREATE_PAYMENT.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
