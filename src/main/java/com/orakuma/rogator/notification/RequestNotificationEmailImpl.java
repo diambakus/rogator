@@ -3,6 +3,8 @@ package com.orakuma.rogator.notification;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,32 +21,28 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class RequestNotificationEmailImpl implements RequestNotification {
 
-  private static final String REQUEST_SERVICE_CONFIRMATION_TEMPLATE =
-      """
-        Olá!
-
-        Confirmamos o recebimento do seu pagamento para o serviço:
-        - **Serviço:** %s
-        - **Valor Pago:** %s
-        - **Código de acompanhamento:** %s
-
-        Obrigado pela sua compra! Em caso de dúvidas, entre em contato com o suporte.
-    """;
   private final JavaMailSender mailSender;
+  private final MessageSource messageSource;
 
   @Async
   @Override
   public void notifyRequestor(
       String serviceTitle, String trackingCode, BigDecimal price, String toEmail) {
+    Locale locale = LocaleContextHolder.getLocale();
+    NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(locale);
+    String formattedPrice = currencyFormatter.format(price);
+
     SimpleMailMessage message = new SimpleMailMessage();
     message.setTo(toEmail);
-    message.setSubject("Sua compra - " + serviceTitle);
-
-    NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.of("pt", "PT"));
-    String formattedPrice = currencyFormatter.format(price);
+    message.setSubject(
+        messageSource.getMessage(
+            "email.request.confirmation.subject", new Object[] {serviceTitle}, locale));
     message.setText(
-        REQUEST_SERVICE_CONFIRMATION_TEMPLATE.formatted(
-            serviceTitle, formattedPrice, trackingCode));
+        messageSource.getMessage(
+            "email.request.confirmation.body",
+            new Object[] {serviceTitle, formattedPrice, trackingCode},
+            locale));
+
     try {
       this.mailSender.send(message);
     } catch (MailException ex) {
