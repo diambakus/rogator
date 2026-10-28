@@ -28,8 +28,7 @@ public class FileUploadController {
   @PostMapping("/uploadMultipleFiles/{applicationId}")
   public ResponseEntity<List<UploadedFileDto>> handleFileUpload(
       @PathVariable("applicationId") Long applicationId,
-      @RequestParam("file") LinkedList<MultipartFile> multipartFiles,
-      Authentication authentication) {
+      @RequestParam("file") LinkedList<MultipartFile> multipartFiles) {
 
     if (multipartFiles.isEmpty()) {
       return ResponseEntity.badRequest().body(List.of(new UploadedFileDto("Files list is empty!")));
@@ -47,7 +46,7 @@ public class FileUploadController {
 
   @GetMapping("/downloadApplicationFiles/{applicationId}")
   private ResponseEntity<List<UploadedFileDto>> getUploadedFiles(
-      @PathVariable("applicationId") Long applicationId, Authentication authentication) {
+      @PathVariable("applicationId") Long applicationId) {
     LinkedList<UploadedFileDto> uploadedFileDtos =
         new LinkedList<>(fileUploadService.findByApplicationId(applicationId));
     LinkedHashMap<Long, URI> downloadableURIAndIdMap = buildDownloadableUriAndId(uploadedFileDtos);

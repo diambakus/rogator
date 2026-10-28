@@ -6,6 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record PaypalProperties(
         String mode,
         String clientId,
-        String clientSecret,
+        char[] clientSecret,
         String currencyCode
 ) {}

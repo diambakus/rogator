@@ -37,6 +37,18 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: issuer
+      client:
+        registration:
+          pi-spi:
+            client-id: ${payment.pispi.client-id}
+            client-secret: ${payment.pispi.client-secret}
+            authorization-grant-type: client_credentials
+            client-authentication-method: client_secret_basic
+            scope:
+              -
+        provider:
+          pi-spi:
+            token-uri: ${payment.pispi.authentication-url}
   servlet:
     multipart:
       max-file-size: 128KB
@@ -83,6 +95,18 @@ payment:
     client-id: <clientId>
     client-secret: <clientSecret>
     currency-code: <currencyCode>
+  pispi:
+    client-id: <clientId>
+    client-secret: <clientSecret>
+    authentication-url: <authenticationUrl>
+    base-url: <PaymentUrl>
+    payeAlias: <payeAlias>
+    api-key: <apiKey>
+    payment-url: <payment-url>
+    payment-status: <payment-status>
+    logo-url: placeholder
+    categorie: placeholder
+    durationLimitPayment: 2 #at most 2 minutes.
 
 #Jobs
 cron:

@@ -14,15 +14,17 @@ public class PaypalConfiguration {
   public PayPalHttpClient payPalHttpClient(PaypalProperties properties) {
 
     PayPalEnvironment environment;
-      if (properties.mode().equalsIgnoreCase("live")) {
-          environment =
-                  new PayPalEnvironment.Live(properties.clientId(), properties.clientSecret());
-          log.info("Using paypal live payment client");
-      } else {
-          environment =
-                  new PayPalEnvironment.Sandbox(properties.clientId(), properties.clientSecret());
-        log.info("Using paypal sandbox payment client");
-      }
+    if (properties.mode().equalsIgnoreCase("live")) {
+      environment =
+          new PayPalEnvironment.Live(
+              properties.clientId(), String.valueOf(properties.clientSecret()));
+      log.info("Using paypal live payment client");
+    } else {
+      environment =
+          new PayPalEnvironment.Sandbox(
+              properties.clientId(), String.valueOf(properties.clientSecret()));
+      log.info("Using paypal sandbox payment client");
+    }
 
     return new PayPalHttpClient(environment);
   }

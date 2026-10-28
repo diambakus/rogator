@@ -2,11 +2,38 @@ spring:
   liquibase:
     enabled: true
   datasource:
-    url: jdbc:postgresql://IP:5432/rogator_db
-    username: user
-    password: pass
+    url: jdbc:postgresql://91.98.90.152:5432/rogator_db
+    username: kumpo
+    password: '@TFdssk0pOk%&plKI('
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://keycloak:8080/realms/kumpo/protocol/openid-connect/certs
+          issuer-uri: https://keycloak.orakuma.de/realms/kumpo
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: devnoreply10@gmail.com
+    password: hzejukqwzqqfwajh
+
+app:
+  storage:
+    root: /opt/uploads/rogator
+    attachmentsFolderName: applications-attachments
+  application:
+    creation:
+      durability: 15 # 5 minutes
+
+#Jobs
+cron:
+  change-application-status: 0 0 0 1 * *  #runs at 00:00
+
+#Payment details
+payment:
+  paypal:
+    client-id: BAAXd1VPP3t-g_l-qSJpmwbzdmJbzLVIz8Ot7fiLljyqNm7h892uMto_jC6z6X-6XaPCqYZpVM1B2Q1xq4
+    client-secret: EGeXkvzmrr91a_FM1rkTiQGETm52NhrFjaftAsfYziHYv-WYOEqU75xIJoNWaBm8ImLbzVvt6vZGLDMK
+    currency-code: EUR
+
+servitus:
+  baseUrl: base-url

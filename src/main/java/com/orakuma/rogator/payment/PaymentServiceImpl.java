@@ -3,6 +3,7 @@ package com.orakuma.rogator.payment;
 import com.orakuma.rogator.application.ApplicationEntity;
 import com.orakuma.rogator.application.ApplicationRepository;
 import com.orakuma.rogator.payment.exceptions.PaymentProcessingException;
+import com.orakuma.rogator.payment.pispi.*;
 import com.paypal.orders.Order;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class PaymentServiceImpl implements PaymentService {
   private final PaymentMapper paymentMapper;
   private final ApplicationRepository applicationRepository;
   private final PaymentPersistenceService paymentPersistenceService;
+  private final PispiService pispiService;
 
   @Override
   public String createOrder(String applicationId, PaymentTypeRequest paymentTypeRequest) {
@@ -29,23 +31,30 @@ public class PaymentServiceImpl implements PaymentService {
       throw new IllegalArgumentException("applicationId cannot be null or empty");
     }
 
-    ApplicationEntity application =
-            applicationRepository
-                    .findByPublicId(applicationId)
-                    .orElseThrow(
-                            () -> new EntityNotFoundException("Application not found for ID: " + applicationId));
+    ApplicationEntity application = getApplicationEntity(applicationId);
 
     PaymentType paymentType = paymentMapper.mapToDomain(paymentTypeRequest);
 
     String orderId =
-            switch (paymentTypeRequest) {
-              case PAYPAL -> executePaypalOrderCreation(application);
-              default -> throw new UnsupportedOperationException(
-                      "Unsupported payment type: " + paymentTypeRequest);
-            };
+        switch (paymentTypeRequest) {
+          case PAYPAL -> executePaypalOrderCreation(application);
+          default ->
+              throw new UnsupportedOperationException(
+                  "Unsupported payment type: " + paymentTypeRequest);
+        };
 
     paymentPersistenceService.saveOrUpdatePayment(application, orderId, paymentType);
     return orderId;
+  }
+
+  private ApplicationEntity getApplicationEntity(String applicationId) {
+    ApplicationEntity application =
+        applicationRepository
+            .findByPublicId(applicationId)
+            .orElseThrow(
+                () ->
+                    new EntityNotFoundException("Application not found for ID: " + applicationId));
+    return application;
   }
 
   private String executePaypalOrderCreation(ApplicationEntity application) {
@@ -65,15 +74,30 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     PaymentEntity paymentEntity =
-            paymentRepository
-                    .findByOrderId(orderId)
-                    .orElseThrow(() -> new EntityNotFoundException("Order not found for ID: " + orderId));
+        paymentRepository
+            .findByOrderId(orderId)
+            .orElseThrow(() -> new EntityNotFoundException("Order not found for ID: " + orderId));
 
     Order resultOrder = executePaypalCaptureOrder(orderId);
 
     paymentPersistenceService.completePaymentAndApplication(paymentEntity.getId());
 
     return resultOrder;
+  }
+
+  @Override
+  public CreatePaymentRequestResponse requestPispiPayment(
+      PaymentRequestDto paymentRequestDto, PaymentTypeRequest paymentTypeRequest) {
+    log.info("creating payment request for PI-SPI");
+    ApplicationEntity applicationEntity = getApplicationEntity(paymentRequestDto.orderId());
+    PispiAndApplicationInput pispiRequestInput =
+        getPispiAndApplicationInput(applicationEntity, paymentRequestDto.payeurAlias());
+    return pispiService.requestPayment(pispiRequestInput);
+  }
+
+  @Override
+  public PaymentStatusResponse getPispiPaymentStatus(String txId) {
+    return pispiService.getPaymentStatus(txId);
   }
 
   private Order executePaypalCaptureOrder(String orderId) {
@@ -84,5 +108,14 @@ public class PaymentServiceImpl implements PaymentService {
       log.error("Error capturing order for orderId {}", orderId);
       throw new PaymentProcessingException("Error capturing order for orderId " + e);
     }
+  }
+
+  private PispiAndApplicationInput getPispiAndApplicationInput(
+      ApplicationEntity applicationEntity, String payeurAlias) {
+    return new PispiAndApplicationInput(
+        applicationEntity.getTrackingCode(),
+        applicationEntity.getPrice(),
+        applicationEntity.getName(),
+        payeurAlias);
   }
 }

@@ -7,6 +7,7 @@ public interface PaymentMapper {
   default PaymentType mapToDomain(PaymentTypeRequest paymentTypeRequest) {
     return switch (paymentTypeRequest) {
       case PAYPAL -> PaymentType.PAYPAL;
+      case PISPI -> PaymentType.PISPI;
     };
   }
 }
