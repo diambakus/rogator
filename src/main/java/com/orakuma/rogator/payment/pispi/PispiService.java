@@ -6,9 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Service
@@ -38,14 +41,16 @@ public class PispiService {
         .onStatus(
             HttpStatusCode::is4xxClientError,
             (request, response) -> {
-              log.error("Could not request failed: {}", request);
-              throw new PaymentProcessingException(response.getStatusText());
+              String body = readBody(response);
+              log.error("PI-SPI rejected request {} -> {}: {}", request.getURI(), response.getStatusCode(), body);
+              throw new PaymentProcessingException(response.getStatusText() + ": " + body);
             })
         .onStatus(
             HttpStatusCode::is5xxServerError,
             (request, response) -> {
-              log.error("Server could not process request: {}", request);
-              throw new PaymentProcessingException(response.getStatusText());
+              String body = readBody(response);
+              log.error("PI-SPI server error on {} -> {}: {}", request.getURI(), response.getStatusCode(), body);
+              throw new PaymentProcessingException(response.getStatusText() + ": " + body);
             })
         .body(CreatePaymentRequestResponse.class);
   }
@@ -58,15 +63,25 @@ public class PispiService {
         .onStatus(
             HttpStatusCode::is4xxClientError,
             (request, response) -> {
-              log.error("Could not request failed: {}", request);
-              throw new PaymentProcessingException(response.getStatusText());
+              String body = readBody(response);
+              log.error("PI-SPI rejected request {} -> {}: {}", request.getURI(), response.getStatusCode(), body);
+              throw new PaymentProcessingException(response.getStatusText() + ": " + body);
             })
         .onStatus(
             HttpStatusCode::is5xxServerError,
             (request, response) -> {
-              log.error("Server could not process request: {}", request);
-              throw new PaymentProcessingException(response.getStatusText());
+              String body = readBody(response);
+              log.error("PI-SPI server error on {} -> {}: {}", request.getURI(), response.getStatusCode(), body);
+              throw new PaymentProcessingException(response.getStatusText() + ": " + body);
             })
         .body(PaymentStatusResponse.class);
+  }
+
+  private static String readBody(ClientHttpResponse response) {
+    try {
+      return new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      return "<unreadable body>";
+    }
   }
 }

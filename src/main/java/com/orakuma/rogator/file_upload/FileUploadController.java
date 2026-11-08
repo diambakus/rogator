@@ -1,107 +1,88 @@
 package com.orakuma.rogator.file_upload;
 
-import com.orakuma.rogator.file_upload.exceptions.StorageFileNotFoundException;
-import lombok.AllArgsConstructor;
-import org.springframework.core.io.Resource;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.Resource;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("file")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FileUploadController {
 
   private final FileUploadService fileUploadService;
-  private final StorageService storageService;
 
   @PostMapping("/uploadMultipleFiles/{applicationId}")
-  public ResponseEntity<List<UploadedFileDto>> handleFileUpload(
-      @PathVariable("applicationId") Long applicationId,
-      @RequestParam("file") LinkedList<MultipartFile> multipartFiles) {
-
-    if (multipartFiles.isEmpty()) {
+  public ResponseEntity<List<UploadedFileDto>> upload(
+      @PathVariable Long applicationId, @RequestParam("file") List<MultipartFile> files) {
+    if (files.isEmpty()) {
       return ResponseEntity.badRequest().body(List.of(new UploadedFileDto("Files list is empty!")));
     }
-
-    LinkedList<UploadedFileDto> storedFiles =
-        new LinkedList<>(fileUploadService.storeAll(applicationId, multipartFiles));
-
-    LinkedHashMap<Long, URI> downloadableURIAndIdMap = buildDownloadableUriAndId(storedFiles);
-    LinkedList<UploadedFileDto> responseFilesDto =
-        buildResponseDto(storedFiles, downloadableURIAndIdMap);
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(responseFilesDto);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(withDownloadUrls(fileUploadService.storeAll(applicationId, files)));
   }
 
   @GetMapping("/downloadApplicationFiles/{applicationId}")
-  private ResponseEntity<List<UploadedFileDto>> getUploadedFiles(
-      @PathVariable("applicationId") Long applicationId) {
-    LinkedList<UploadedFileDto> uploadedFileDtos =
-        new LinkedList<>(fileUploadService.findByApplicationId(applicationId));
-    LinkedHashMap<Long, URI> downloadableURIAndIdMap = buildDownloadableUriAndId(uploadedFileDtos);
-    LinkedList<UploadedFileDto> responseFilesDto =
-        buildResponseDto(uploadedFileDtos, downloadableURIAndIdMap);
-    return ResponseEntity.status(HttpStatus.OK).body(responseFilesDto);
+  public ResponseEntity<List<UploadedFileDto>> listApplicationFiles(
+      @PathVariable Long applicationId) {
+    return ResponseEntity.ok(withDownloadUrls(fileUploadService.findByApplicationId(applicationId)));
   }
 
   @GetMapping("/files/{id}")
-  @ResponseBody
-  public ResponseEntity<Resource> serveFile(@PathVariable("id") Long id) {
+  public ResponseEntity<Resource> download(@PathVariable Long id) {
+    FileDownload file = fileUploadService.download(id);
 
-    UploadedFileDto uploadedFileDto = fileUploadService.findById(id);
-    Resource file = storageService.loadAsResource(uploadedFileDto.filePath());
+    MediaType mediaType =
+        file.contentType() == null
+            ? MediaType.APPLICATION_OCTET_STREAM
+            : MediaType.parseMediaType(file.contentType());
 
-    if (file == null) return ResponseEntity.notFound().build();
-
-    return ResponseEntity.ok()
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
-        .body(file);
+    ResponseEntity.BodyBuilder response =
+        ResponseEntity.ok()
+            .contentType(mediaType)
+            .header(
+                HttpHeaders.CONTENT_DISPOSITION,
+                // RFC 6266/5987 encoding: safe for quotes, CR/LF and non-ASCII names.
+                ContentDisposition.attachment()
+                    .filename(file.filename(), StandardCharsets.UTF_8)
+                    .build()
+                    .toString())
+            .header("X-Content-Type-Options", "nosniff")
+            .cacheControl(CacheControl.noStore());
+    if (file.size() != null) {
+      response.contentLength(file.size());
+    }
+    return response.body(file.resource());
   }
 
-  @ExceptionHandler(StorageFileNotFoundException.class)
-  public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-    return ResponseEntity.notFound().build();
-  }
-
-  private LinkedHashMap<Long, URI> buildDownloadableUriAndId(LinkedList<UploadedFileDto> files) {
+  /** The {@code filePath} field of the response carries the download URL, never the disk path. */
+  private List<UploadedFileDto> withDownloadUrls(List<UploadedFileDto> files) {
     return files.stream()
-        .collect(
-            Collectors.toMap(
-                UploadedFileDto::id,
-                fileUploadDto ->
-                    MvcUriComponentsBuilder.fromMethodName(
-                            FileUploadController.class, "serveFile", fileUploadDto.id())
-                        .build()
-                        .toUri(),
-                (existing, replacement) -> existing,
-                LinkedHashMap::new));
-  }
-
-  private LinkedList<UploadedFileDto> buildResponseDto(
-      LinkedList<UploadedFileDto> uploadedFileDtos,
-      LinkedHashMap<Long, URI> downloadableURIAndIdMap) {
-    LinkedList<UploadedFileDto> responseDtos = new LinkedList<>();
-    uploadedFileDtos.forEach(
-        fileUploadDto -> {
-          responseDtos.add(
-              new UploadedFileDto(
-                  fileUploadDto.id(),
-                  fileUploadDto.filename(),
-                  String.valueOf(downloadableURIAndIdMap.get(fileUploadDto.id())),
-                  null));
-        });
-    return responseDtos;
+        .map(
+            f ->
+                new UploadedFileDto(
+                    f.id(),
+                    f.filename(),
+                    ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/file/files/{id}")
+                        .buildAndExpand(f.id())
+                        .toUriString(),
+                    null))
+        .toList();
   }
 }

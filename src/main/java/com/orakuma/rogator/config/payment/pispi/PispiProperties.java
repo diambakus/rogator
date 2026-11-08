@@ -14,4 +14,5 @@ public record PispiProperties(
     String logoUrl,
     String categorie,
     String payeAlias,
-    Long durationLimitPayment) {}
+    Long durationLimitPayment,
+    String sslBundle) {}

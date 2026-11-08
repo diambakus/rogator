@@ -1,124 +1,160 @@
 package com.orakuma.rogator.file_upload;
 
 import com.orakuma.rogator.application.ApplicationEntity;
-import com.orakuma.rogator.utils.FilePartsUtils;
+import com.orakuma.rogator.file_upload.FileTypeDetector.DetectedType;
 import com.orakuma.rogator.utils.RepositoriesHandler;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
+import com.orakuma.rogator.file_upload.exceptions.FileUploadNotFoundException;
+import com.orakuma.rogator.file_upload.exceptions.StorageException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class FileUploadServiceImpl implements FileUploadService {
 
+  private static final int MAX_DISPLAY_NAME_LENGTH = 255;
+
   private final FileUploadRepository fileUploadRepository;
   private final FileUploadMapper fileUploadMapper;
   private final RepositoriesHandler repositoriesHandler;
   private final StorageProperties storageProperties;
-  private Path rootLocation;
-
-  @PostConstruct
-  void init() throws IOException {
-    this.rootLocation = storageProperties.getRoot().toAbsolutePath().normalize();
-  }
+  private final StorageService storageService;
+  private final FileTypeDetector fileTypeDetector;
+  private final FileAccessPolicy accessPolicy;
 
   @Override
+  @Transactional(readOnly = true)
   public UploadedFileDto findById(Long id) {
-    FileUploadEntity fileUploadEntity = repositoriesHandler.getFileUploadEntityById(id);
-    return fileUploadMapper.toDto(fileUploadEntity);
-  }
-
-  @Transactional
-  @Override
-  public List<UploadedFileDto> storeAll(Long applicationId, List<MultipartFile> files) {
-
-    ApplicationEntity applicationEntity =
-        repositoriesHandler.getApplicationEntityById(applicationId);
-
-    // 1. Validate everything first
-    files.forEach(FilePartsUtils::validateFile);
-
-    LinkedList<FileUploadEntity> persistingEntity = new LinkedList<>();
-    Iterable<FileUploadEntity> persistedEntity;
-    List<Path> writtenFiles = new ArrayList<>(files.size());
-
-    try {
-      for (MultipartFile file : files) {
-
-        String extension = FilePartsUtils.resolveExtension(file.getContentType());
-        String storedFilename = UUID.randomUUID() + extension;
-        Path relativePath =
-            Path.of(
-                storageProperties.getAttachmentsFolderName(),
-                applicationId.toString(),
-                storedFilename);
-        Path target = rootLocation.resolve(relativePath).normalize();
-        Files.createDirectories(target.getParent());
-
-        // 2. Write file to disk
-        try (InputStream in = file.getInputStream()) {
-          Files.copy(in, target);
-        }
-
-        writtenFiles.add(target);
-
-        FileUploadEntity entity =
-            new FileUploadEntity()
-                .setFilePath(relativePath.toString())
-                .setFilename(file.getOriginalFilename())
-                .setFileSize(file.getSize())
-                .setFileType(extension)
-                .setApplication(applicationEntity)
-                .setCreated(LocalDate.now());
-
-        persistingEntity.add(entity);
-      }
-
-      persistedEntity = fileUploadRepository.saveAll(persistingEntity);
-      return fileUploadMapper.toDtos(
-          StreamSupport.stream(persistedEntity.spliterator(), false)
-              .collect(Collectors.toCollection(LinkedList::new)));
-    } catch (Exception ex) {
-      writtenFiles.forEach(this::quietlyDelete);
-      log.info("Cleanup filesystem some file(s) fails: {}", ex.getMessage());
-      try {
-        throw ex;
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
+    return fileUploadMapper.toDto(readableEntity(id));
   }
 
   @Override
+  @Transactional(readOnly = true)
   public List<UploadedFileDto> findByApplicationId(Long applicationId) {
-    log.info("Finding files by application id {}", applicationId);
-    List<FileUploadEntity> fileUploadEntities = fileUploadRepository.findByApplicationId(applicationId);
-    return fileUploadMapper.toDtos(fileUploadEntities);
+    ApplicationEntity application = repositoriesHandler.getApplicationEntityById(applicationId);
+    if (!accessPolicy.canRead(application)) {
+      throw new AccessDeniedException("Not allowed to read files of application " + applicationId);
+    }
+    return fileUploadMapper.toDtos(fileUploadRepository.findByApplicationId(applicationId));
   }
 
-  private void quietlyDelete(Path path) {
-    try {
-      Path normalized = path.normalize();
-      if (!normalized.startsWith(rootLocation)) {
-        log.error("Refusing to delete path outside root: {}", normalized);
-        return;
-      }
-      Files.deleteIfExists(normalized);
-    } catch (IOException ex) {
-      log.warn("Failed to cleanup file {}", path, ex);
+  @Override
+  @Transactional(readOnly = true)
+  public FileDownload download(Long id) {
+    FileUploadEntity entity = readableEntity(id);
+    return new FileDownload(
+        storageService.loadAsResource(entity.getFilePath()),
+        entity.getFilename(),
+        entity.getContentType(),
+        entity.getFileSize());
+  }
+
+  @Override
+  @Transactional
+  public List<UploadedFileDto> storeAll(Long applicationId, List<MultipartFile> files) {
+    ApplicationEntity application = repositoriesHandler.getApplicationEntityById(applicationId);
+    if (!accessPolicy.canUpload(application)) {
+      throw new AccessDeniedException("Not allowed to upload to application " + applicationId);
     }
+
+    // Validate every file before touching the disk: all-or-nothing.
+    List<DetectedType> types = files.stream().map(fileTypeDetector::detect).toList();
+
+    List<String> storedKeys = new ArrayList<>(files.size());
+    // Covers failures after this method returns (flush/commit errors): files must not be orphaned.
+    registerRollbackCleanup(storedKeys);
+
+    List<FileUploadEntity> entities = new ArrayList<>(files.size());
+    String directoryKey = storageProperties.attachmentsFolderName() + "/" + applicationId;
+
+    try {
+      for (int i = 0; i < files.size(); i++) {
+        MultipartFile file = files.get(i);
+        DetectedType type = types.get(i);
+        String storedFilename = UUID.randomUUID() + type.extension();
+
+        String key;
+        try (InputStream in = file.getInputStream()) {
+          key = storageService.store(directoryKey, storedFilename, in);
+        } catch (IOException e) {
+          throw new StorageException("Failed to read uploaded file", e);
+        }
+        storedKeys.add(key);
+
+        entities.add(
+            new FileUploadEntity()
+                .setFilePath(key)
+                .setStoredFilename(storedFilename)
+                .setFilename(sanitizeDisplayName(file.getOriginalFilename(), type.extension()))
+                .setFileSize(file.getSize())
+                .setFileType(type.extension())
+                .setContentType(type.contentType())
+                .setApplication(application)
+                .setCreated(LocalDate.now()));
+      }
+      List<FileUploadEntity> saved = new ArrayList<>(entities.size());
+      fileUploadRepository.saveAll(entities).forEach(saved::add);
+      return fileUploadMapper.toDtos(saved);
+    } catch (RuntimeException ex) {
+      log.warn("Upload failed, removing {} stored file(s): {}", storedKeys.size(), ex.getMessage());
+      storedKeys.forEach(storageService::deleteQuietly);
+      throw ex;
+    }
+  }
+
+  /** Unauthorised callers get "not found", so file ids cannot be enumerated. */
+  private FileUploadEntity readableEntity(Long id) {
+    FileUploadEntity entity = repositoriesHandler.getFileUploadEntityById(id);
+    if (!accessPolicy.canRead(entity.getApplication())) {
+      throw new FileUploadNotFoundException("FileUploadEntity with id " + id + " not found");
+    }
+    return entity;
+  }
+
+  private void registerRollbackCleanup(List<String> storedKeys) {
+    if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+      return;
+    }
+    TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+          @Override
+          public void afterCompletion(int status) {
+            if (status != STATUS_COMMITTED) {
+              storedKeys.forEach(storageService::deleteQuietly);
+            }
+          }
+        });
+  }
+
+  /**
+   * The client file name is only ever used as display / download metadata (never as an on-disk
+   * name). Strip any directory part (both separators, since browsers/OSes differ), control
+   * characters and characters that are illegal on common file systems.
+   */
+  static String sanitizeDisplayName(String original, String fallbackExtension) {
+    String name = original == null ? "" : original;
+    name = name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\')) + 1);
+    name = name.replaceAll("[\\p{Cntrl}<>:\"|?*]", "_").strip();
+    if (name.isEmpty() || name.chars().allMatch(c -> c == '.')) {
+      name = "file" + fallbackExtension;
+    }
+    if (name.length() > MAX_DISPLAY_NAME_LENGTH) {
+      name = name.substring(0, MAX_DISPLAY_NAME_LENGTH);
+    }
+    return name;
   }
 }

@@ -51,8 +51,8 @@ spring:
             token-uri: ${payment.pispi.authentication-url}
   servlet:
     multipart:
-      max-file-size: 128KB
-      max-request-size: 10MB
+      max-file-size: 10MB
+      max-request-size: 50MB
       enabled: true
       location: ${java.io.tmpdir}
   profiles:
@@ -82,7 +82,9 @@ management:
 
 app:
   storage:
-    root: /data/uploads
+    # Override with ROGATOR_STORAGE_ROOT (e.g. /var/lib/rogator/uploads or D:\rogator\uploads).
+    # Default is portable: <user home>/rogator/uploads on Linux, macOS and Windows.
+    root: ${ROGATOR_STORAGE_ROOT:${user.home}/rogator/uploads}
     attachmentsFolderName: applications-attachments
   application:
     creation:

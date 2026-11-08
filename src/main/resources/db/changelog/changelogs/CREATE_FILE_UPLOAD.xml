@@ -297,4 +297,54 @@
 
     </changeSet>
 
+    <!-- ================================================================= -->
+    <!-- CHANGESET 9 - SEQUENCE USED BY FileUploadEntity (f_upload_seq)    -->
+    <!-- ================================================================= -->
+
+    <changeSet id="9-create-f-upload-seq" author="adruida">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="f_upload_seq" schemaName="${schemaName}"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE SEQUENCE ${schemaName}.f_upload_seq START WITH 1 INCREMENT BY 1
+        </sql>
+        <sql>
+            SELECT setval('${schemaName}.f_upload_seq',
+                          GREATEST((SELECT COALESCE(MAX(id), 0) FROM ${schemaName}.files_locations), 1))
+        </sql>
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 10 - ADD content_type (verified MIME type)              -->
+    <!-- ================================================================= -->
+
+    <changeSet id="10-add-content-type-column" author="adruida">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="files_locations" schemaName="${schemaName}"/>
+            <not>
+                <columnExists tableName="files_locations" schemaName="${schemaName}" columnName="content_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="files_locations" schemaName="${schemaName}">
+            <column name="content_type" type="VARCHAR(100)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- ================================================================= -->
+    <!-- CHANGESET 11 - NORMALISE LEGACY file_path TO '/' SEPARATORS       -->
+    <!-- ================================================================= -->
+
+    <changeSet id="11-normalise-file-path-separators" author="adruida">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="files_locations" schemaName="${schemaName}"/>
+        </preConditions>
+        <sql>
+            UPDATE ${schemaName}.files_locations
+               SET file_path = REPLACE(file_path, E'\\', '/')
+             WHERE POSITION(E'\\' IN file_path) > 0
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

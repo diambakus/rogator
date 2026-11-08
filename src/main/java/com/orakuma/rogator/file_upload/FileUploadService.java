@@ -5,10 +5,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface FileUploadService {
-    UploadedFileDto findById(Long id);
-    List<UploadedFileDto> storeAll(
-            Long applicationId,
-            List<MultipartFile> files
-    );
-    List<UploadedFileDto> findByApplicationId(Long applicationId);
+  UploadedFileDto findById(Long id);
+
+  List<UploadedFileDto> storeAll(Long applicationId, List<MultipartFile> files);
+
+  List<UploadedFileDto> findByApplicationId(Long applicationId);
+
+  FileDownload download(Long id);
 }

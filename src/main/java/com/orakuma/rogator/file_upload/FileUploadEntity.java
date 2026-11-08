@@ -34,4 +34,5 @@ public class FileUploadEntity implements Serializable {
     private ApplicationEntity application;
     private LocalDate         created;
     private String            storedFilename;
+    private String            contentType;
 }
